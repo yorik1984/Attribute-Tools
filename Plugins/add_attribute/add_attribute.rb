@@ -27,25 +27,25 @@ module AddAttributes
   def self.select_components_messagebox?(selection)
     if !selection.empty?
       selection.each do |entity|
-        if !(entity.class == Sketchup::ComponentInstance)
-          UI.messagebox("Выберите только компоненты")
+        if entity.class != Sketchup::ComponentInstance
+          UI.messagebox("Select only components")
           return false
           nil
         end
       end
     else
-      UI.messagebox("Ничего не выбрано")
+      UI.messagebox("Select nothing")
       return false
       nil
     end
     true
   end
 
-  def recursive_count_attr(entity,input)
+  def self.recursive_count_attr(entity,input)
     if (entity.typename == "Face") || (entity.typename == "Edge")
       simple = 0
       complex = 0
-      if (entity.typename == "ComponentInstance")
+      if (entity.class == Sketchup::ComponentInstance)
         for i in 0..entity.definition.entities.count - 1
           if component_instance?(entity.definition.entities[i])
             simple = simple + 1
@@ -61,83 +61,87 @@ module AddAttributes
     end
   end
 
-  def set_attributes(entity ,input)
-    model.start_operation
-    massiv = ["десятичное число","текст","дюймы","сантиметры"]
-    attributes_formulaunits = input[4]
-    attributes_formulaunits = massiv.index(attributes_formulaunits)
-    massiv = ["FLOAT","STRING","INCHES","CENTIMETERS"]
-    attributes_formulaunits = massiv[attributes_formulaunits]
-    entity.set_attribute'dynamic_attributes',"_" + input[0] + "_formulaunits",attributes_formulaunits.to_s
-    massiv = ["использовать единицы модели","целое число","десятичное число","процент","True/False","текст","дюймы","десятичные футы","миллиметры","сантиметры","метры","градусы","доллары","евро","йены","фунты(вес)","килограммы"]
-    attributes_units = input[2]
-    attributes_units = massiv.index(attributes_units)
-    massiv =["DEFAULT","INTEGER","FLOAT","PERCENT","BOOLEAN","STRING","INCHES","FEET","MILLIMETERS","CENTIMETERS","METERS","DEGREES","DOLLARS","EUROS","YEN","POUNDS","KILOGRAMS"]
-    attributes_units = massiv[attributes_units]
-    entity.set_attribute'dynamic_attributes',"_" + input[0] +"_units",attributes_units.to_s
-    entity.set_attribute'dynamic_attributes','_lengthunits',input[7]
-    entity.set_attribute'dynamic_attributes',"_" + input[0] +"_label",input[0]
-    entity.set_attribute'dynamic_attributes',("_"+ input[0] + "_formlabel"),input[1]
-    data_attribute=input[3]
-    if input[2] == "миллиметры"
-      entity.set_attribute'dynamic_attributes',input[0],(data_attribute.to_f*0.0393700787401575)
-      else
-        if input[2]=="сантиметры"
-        entity.set_attribute'dynamic_attributes',input[0],(data_attribute.to_f*0.393700787401575)
-        else
-          if (input[2]=="метры")
-            entity.set_attribute'dynamic_attributes',input[0],(data_attribute.to_f*39.3700787401575)
-          else
-            entity.set_attribute'dynamic_attributes',input[0],input[3]
-          end
-       end
-     end
-    massiv = ["пользователи не видят атрибут.","пользователи видят атрибут.","ввод в текстовом поле.","выбор из списка."]
-    attributes_access =input[5]
-    attributes_access =massiv.index(attributes_access)
-    massiv = ["NONE","VIEW","TEXTBOX","LIST"]
-    attributes_access =massiv[attributes_access]
-    entity.set_attribute'dynamic_attributes',"_" + input[0]+"_access",attributes_access.to_s
+  def self.set_attributes(entity ,input)
+    attributes_formulaunits = { FLOAT: "Decimal Number",
+                               STRING: "Text",
+                               INCHES: "Inches",
+                          CENTIMETERS: "Centimeters" }
+    attributes_units = { DEFAULT: "End user\'s model units",
+                         INTEGER: "Whole Number",
+                           FLOAT: "Decimal Number",
+                         PERCENT: "Percentage",
+                         BOOLEAN: "True/False",
+                          STRING: "Text",
+                          INCHES: "Inches",
+                            FEET: "Decimal Feet",
+                     MILLIMETERS: "Millimeters",
+                     CENTIMETERS: "Centimeters",
+                          METERS: "Meters",
+                         DEGREES: "Degrees",
+                         DOLLARS: "Dollars",
+                           EUROS: "Euros",
+                             YEN: "Yen",
+                          POUNDS: "Pounds (weight)",
+                       KILOGRAMS: "Kilograms" }
+    attributes_access = { NONE: "User cannot see this attribute",
+                          VIEW: "User can see this attribute",
+                       TEXTBOX: "User can edit as a textbox",
+                          LIST: "User can select from a list" }
+    entity.set_attribute 'dynamic_attributes', "_" + input[0] +"_label", input[0]
+    entity.set_attribute 'dynamic_attributes', ("_" + input[0] + "_formlabel"), input[1]
+    entity.set_attribute 'dynamic_attributes', "_" + input[0] +"_units", attributes_units.key(input[2]).to_s
+    entity.set_attribute 'dynamic_attributes', "_" + input[0] + "_formulaunits", attributes_formulaunits.key(input[4]).to_s
+    entity.set_attribute 'dynamic_attributes', "_" + input[0] + "_access", attributes_access.key(input[5]).to_s
     if input[6] != nil
-      entity.set_attribute'dynamic_attributes',"_" + input[0] + "_options",input[6]
+      entity.set_attribute 'dynamic_attributes' , "_" + input[0] + "_options", input[6]
     end
-    model.commit_operation
-    UI.messagebox("Атрибут успешно установлен!")
+    entity.set_attribute 'dynamic_attributes', '_lengthunits', input[7]
+    case input[2].to_s
+    when "Millimeters"
+      result_units = input[3].to_f*(1.to_inch/1.to_mm)
+    when "Centimeters"
+      result_units = input[3].to_f*(1.to_inch/1.to_cm)
+    when "Meters"
+      result_units = input[3].to_f*(1.to_inch/1.to_m)
+    else
+      result_units = input[3]
+    end
+    entity.set_attribute 'dynamic_attributes', input[0], result_units
+    UI.messagebox("Attributes set success!")
   end #set_attributes
 
   def self.inputbox_attributes
     model = Sketchup.active_model
     selection = model.selection
     if select_components_messagebox?(selection)
-      prompts = ["Имя атрибута",
-                 "Имя для отображения в \"Опциях\"",
-                 "Единицы для отображения в \"Опциях\"",
-                 "Текущее значение или формула",
-                 "Переменная атрибута",
-                 "Тип атрибута",
-                 "Данные для списка",
-                 "Единицы размеров компонента"]
+      prompts = ["Name",
+                 "Display label",
+                 "Display in",
+                 "Value",
+                 "Units",
+                 "Display rule",
+                 "List Option (Option = Value)",
+                 "Toggle Units"]
       defaults = ["",
                   "",
-                  "использовать единицы модели",
+                  "End user\'s model units",
                   "",
-                  "текст",
-                  "пользователи не видят атрибут.",
+                  "Text",
+                  "User cannot see this attribure",
                   "",
                   "CENTIMETERS"]
       list = ["",
               "",
-              "использовать единицы модели|целое число|десятичное число|процент|True/False|текст|дюймы|десятичные футы|миллиметры|сантиметры|метры|градусы|доллары|евро|йены|фунты(вес)|килограммы",
+              "End user\'s model units|Whole Number|Decimal Number|Percentage|True/False|Text|Inches|Decimal Feet|Millimeters|Centimeters|Meters|Degrees|Dollars|Euros|Yen|Pounds (weight)|Kilograms",
               "",
-              "десятичное число|текст|дюймы|сантиметры",
-              "пользователи не видят атрибут.|пользователи видят атрибут.|ввод в текстовом поле.|выбор из списка.",
+              "Decimal Number|Text|Inches|Centimeters",
+              "User cannot see this attribure|User can see this attribure|User can edit as a textbox|User can select from a list",
               "",
               "INCHES|CENTIMETERS"]
-      input = UI.inputbox(prompts, defaults, list, "Введите имена и значения атрибутов")
-      selection.each do |entity|
-        entity = selection[i]
-        set_attributes(entity, input)
-      end
+      input = UI.inputbox(prompts, defaults, list, "Input attributes")
+      status = model.start_operation('Adding attribute', true)
+      selection.each { |entity| set_attributes(entity, input) }
+      model.commit_operation
     end
   end
 
