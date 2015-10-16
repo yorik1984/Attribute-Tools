@@ -7,27 +7,67 @@
 # License: GPL V.3
 # Author: Igor Sepelev aka goga63
 # Name: add_attribute.rb
-# Version: 2.0
+# Version: 1.1
 # Description: Plugin add attributes of components in model
 # Usage: see README
 # History:
 # 1.0 Initial release
 # by Igor Sepelev aka goga63
 #
-# 2.0 11-October-2015
+# 1.1 16-October-2015
 # by Yurij Kulchevich
-#  - add english version of dialogs and toolbar icon;
-#  - import data from CSV file.
-#------------------------------------------------------------------------------
+#  - add english version of dialogs;
+#  - add toolbar icon;
+#  - validate input;
+# ------------------------------------------------------------------------------
 
 require 'sketchup.rb'
 
 module AddAttributes
 
+  def self.is_valid_attribute_name?(input)
+    #Inspect attribute name
+    special = " ?<>',./[]=-)(*&^%$#`~{}"
+    special_digits = "0123456789"
+    regex = /[#{special.gsub(/./){|char| "\\#{char}"}}]/
+    regex_digits = /[#{special_digits.gsub(/./){|char| "\\#{char}"}}]/
+    if input =~ regex
+      UI.messagebox("Attribute names can only contain letters and numbers without space")
+      return false
+      nil
+    end
+    if input[0] =~ regex_digits
+      UI.messagebox("Attribute names cannot begin with an number")
+      return false
+      nil
+    end
+    if input[0].to_s == "" || input[0].to_s == "_"
+      UI.messagebox("Attribute names cannot be empty or begin with an underscore")
+      return false
+      nil
+    end
+    if input.downcase == "true" || input.downcase == "false"
+      UI.messagebox("You may not name an attribute true or false")
+      return false
+      nil
+    end
+    true
+  end
+
+  def self.get_definition(entity)
+    if entity.is_a?(Sketchup::ComponentInstance)
+      entity.definition
+    elsif entity.is_a?(Sketchup::Group)
+      entity.entities.parent
+    else
+      nil
+    end
+  end
+
   def self.select_components_messagebox?(selection)
     if !selection.empty?
       selection.each do |entity|
-        if entity.class != Sketchup::ComponentInstance
+        if !entity.is_a?(Sketchup::ComponentInstance)
           UI.messagebox("Select only components")
           return false
           nil
@@ -39,26 +79,6 @@ module AddAttributes
       nil
     end
     true
-  end
-
-  def self.recursive_count_attr(entity,input)
-    if (entity.typename == "Face") || (entity.typename == "Edge")
-      simple = 0
-      complex = 0
-      if (entity.class == Sketchup::ComponentInstance)
-        for i in 0..entity.definition.entities.count - 1
-          if component_instance?(entity.definition.entities[i])
-            simple = simple + 1
-          else
-            complex = complex + 1
-            recursive_count_attr(entity.definition.entities[i])
-          end
-        end
-      end
-      if (simple > 0) && (complex == 0)
-        set_attributes(entity,input)
-      end
-    end
   end
 
   def self.set_attributes(entity ,input)
@@ -91,7 +111,7 @@ module AddAttributes
     entity.set_attribute 'dynamic_attributes', ("_" + input[0] + "_formlabel"), input[1]
     entity.set_attribute 'dynamic_attributes', "_" + input[0] +"_units", attributes_units.key(input[2]).to_s
     entity.set_attribute 'dynamic_attributes', "_" + input[0] + "_formulaunits", attributes_formulaunits.key(input[4]).to_s
-    entity.set_attribute 'dynamic_attributes', "_" + input[0] + "_access", attributes_access.key(input[5]).to_s
+    entity.set_attribute'dynamic_attributes', "_" + input[0] + "_access", attributes_access.key(input[5]).to_s
     if input[6] != nil
       entity.set_attribute 'dynamic_attributes' , "_" + input[0] + "_options", input[6]
     end
@@ -107,20 +127,28 @@ module AddAttributes
       result_units = input[3]
     end
     entity.set_attribute 'dynamic_attributes', input[0], result_units
-    UI.messagebox("Attributes set success!")
   end #set_attributes
+
+  def self.recursive_set_attributes(selection, input)
+    selection.each do |entity|
+      definition = self.get_definition(entity)
+      next if definition.nil?
+      set_attributes(entity, input) if entity.is_a?(Sketchup::ComponentInstance)
+      self.recursive_set_attributes(definition.entities, input)
+    end
+  end
 
   def self.inputbox_attributes
     model = Sketchup.active_model
     selection = model.selection
     if select_components_messagebox?(selection)
-      prompts = ["Name",
+      prompts = ["Name (String)",
                  "Display label",
                  "Display in",
                  "Value",
                  "Units",
                  "Display rule",
-                 "List Option (Option = Value)",
+                 "List Option (Opt1=Val1\&Opt2=Val2)",
                  "Toggle Units"]
       defaults = ["",
                   "",
@@ -139,8 +167,18 @@ module AddAttributes
               "",
               "INCHES|CENTIMETERS"]
       input = UI.inputbox(prompts, defaults, list, "Input attributes")
+      # TDOD. Add new method
+      if !self.is_valid_attribute_name?(input[0])
+        UI.messagebox("Attributes set failure!")
+        exit
+      end
       status = model.start_operation('Adding attribute', true)
-      selection.each { |entity| set_attributes(entity, input) }
+      answer = UI.messagebox("Do you want recursive adding attribute(s)?", MB_YESNO)
+      if answer == IDYES
+        self.recursive_set_attributes(selection, input)
+      else
+        selection.each { |entity| self.set_attributes(entity, input) }
+      end
       model.commit_operation
     end
   end
