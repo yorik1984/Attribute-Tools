@@ -18,41 +18,74 @@
 # by Yurij Kulchevich
 #  - add english version of dialogs;
 #  - add toolbar icon;
-#  - validate input;
+#  - validate input.
 # ------------------------------------------------------------------------------
 
 require 'sketchup.rb'
 
 module AddAttributes
 
-  def self.is_valid_attribute_name?(input)
+  def self.valid_attribute_name(selection, input)
     #Inspect attribute name
-    special = " ?<>',./[]=-)(*&^%$#`~{}"
-    special_digits = "0123456789"
+    valid_status = []
+    status_error = { NO_ERROR: "Input attribute name correct",
+                  EMPTY_FIELD: "Attribute name cannot be empty",
+               CONTAIN_SPACES: "Attribute name cannot contain spaces",
+         NOT_LETTER_OR_NUMBER: "Attribute name can only contain letters and numbers",
+                   UNDERSCOPE: "Attribute name cannot begin with an underscore",
+              NUMBER_IN_BEGIN: "Attribute name cannot begin with an number",
+                TRUE_OR_FALSE: "You may not name an attribute TRUE or FALSE" }
+
+    if input.to_s == ""
+      valid_status[0] = false
+      valid_status[1] = status_error[:EMPTY_FIELD]
+      return valid_status
+      nil
+    end
+
+    special_space = " "
+    regex_space = /[#{special_space.gsub(/./){|char| "\\#{char}"}}]/
+    if input =~ regex_space
+      valid_status[0] = false
+      valid_status[1] = status_error[:CONTAIN_SPACES]
+      return valid_status
+      nil
+    end
+
+    special = "?<>',./[]=-)(*&^%$#`~{}\""
     regex = /[#{special.gsub(/./){|char| "\\#{char}"}}]/
-    regex_digits = /[#{special_digits.gsub(/./){|char| "\\#{char}"}}]/
     if input =~ regex
-      UI.messagebox("Attribute names can only contain letters and numbers without space")
-      return false
+      valid_status[0] = false
+      valid_status[1] = status_error[:NOT_LETTER_OR_NUMBER]
+      return valid_status
       nil
     end
-    if input[0] =~ regex_digits
-      UI.messagebox("Attribute names cannot begin with an number")
-      return false
+
+     if input[0].to_s == "_"
+      valid_status[0] = false
+      valid_status[1] = status_error[:UNDERSCOPE]
+      return valid_status
       nil
     end
-    if input[0].to_s == "" || input[0].to_s == "_"
-      UI.messagebox("Attribute names cannot be empty or begin with an underscore")
-      return false
+
+    if input[0].to_l
+      valid_status[0] = false
+      valid_status[1] = status_error[:NUMBER_IN_BEGIN]
+      return valid_status
       nil
     end
+
     if input.downcase == "true" || input.downcase == "false"
-      UI.messagebox("You may not name an attribute true or false")
-      return false
+      valid_status[0] = false
+      valid_status[1] = status_error[:TRUE_OR_FALSE]
+      return valid_status
       nil
     end
-    true
-  end
+
+    valid_status[0] = true
+    valid_status[1] = status_error[:NO_ERROR]
+    return valid_status
+  end # valid_attribute_name
 
   def self.get_definition(entity)
     if entity.is_a?(Sketchup::ComponentInstance)
@@ -81,7 +114,7 @@ module AddAttributes
     true
   end
 
-  def self.set_attributes(entity ,input)
+ def self.set_attributes(entity ,input)
     attributes_formulaunits = { FLOAT: "Decimal Number",
                                STRING: "Text",
                                INCHES: "Inches",
@@ -107,13 +140,13 @@ module AddAttributes
                           VIEW: "User can see this attribute",
                        TEXTBOX: "User can edit as a textbox",
                           LIST: "User can select from a list" }
-    entity.set_attribute 'dynamic_attributes', "_" + input[0] +"_label", input[0]
-    entity.set_attribute 'dynamic_attributes', ("_" + input[0] + "_formlabel"), input[1]
-    entity.set_attribute 'dynamic_attributes', "_" + input[0] +"_units", attributes_units.key(input[2]).to_s
-    entity.set_attribute 'dynamic_attributes', "_" + input[0] + "_formulaunits", attributes_formulaunits.key(input[4]).to_s
-    entity.set_attribute'dynamic_attributes', "_" + input[0] + "_access", attributes_access.key(input[5]).to_s
+    entity.set_attribute 'dynamic_attributes', '_' + input[0] +'_label', input[0]
+    entity.set_attribute 'dynamic_attributes', ('_' + input[0] + '_formlabel'), input[1]
+    entity.set_attribute 'dynamic_attributes', '_' + input[0] +'_units', attributes_units.key(input[2]).to_s
+    entity.set_attribute 'dynamic_attributes', '_' + input[0] + '_formulaunits', attributes_formulaunits.key(input[4]).to_s
+    entity.set_attribute'dynamic_attributes', '_' + input[0] + '_access', attributes_access.key(input[5]).to_s
     if input[6] != nil
-      entity.set_attribute 'dynamic_attributes' , "_" + input[0] + "_options", input[6]
+      entity.set_attribute 'dynamic_attributes' , '_' + input[0] + '_options', input[6]
     end
     entity.set_attribute 'dynamic_attributes', '_lengthunits', input[7]
     case input[2].to_s
@@ -149,7 +182,8 @@ module AddAttributes
                  "Units",
                  "Display rule",
                  "List Option (Opt1=Val1\&Opt2=Val2)",
-                 "Toggle Units"]
+                 "Toggle Units",
+                 "Duplicate attribute name"]
       defaults = ["",
                   "",
                   "End user\'s model units",
@@ -157,7 +191,8 @@ module AddAttributes
                   "Text",
                   "User cannot see this attribure",
                   "",
-                  "CENTIMETERS"]
+                  "CENTIMETERS",
+                  "Ignore"]
       list = ["",
               "",
               "End user\'s model units|Whole Number|Decimal Number|Percentage|True/False|Text|Inches|Decimal Feet|Millimeters|Centimeters|Meters|Degrees|Dollars|Euros|Yen|Pounds (weight)|Kilograms",
@@ -165,11 +200,12 @@ module AddAttributes
               "Decimal Number|Text|Inches|Centimeters",
               "User cannot see this attribure|User can see this attribure|User can edit as a textbox|User can select from a list",
               "",
-              "INCHES|CENTIMETERS"]
+              "INCHES|CENTIMETERS",
+              "Ignore|Replace"]
       input = UI.inputbox(prompts, defaults, list, "Input attributes")
-      # TDOD. Add new method
-      if !self.is_valid_attribute_name?(input[0])
-        UI.messagebox("Attributes set failure!")
+      input_check = self.valid_attribute_name(selection, input[0])
+      if !input_check[0]
+        UI.messagebox("Failure!"+ "\n" + input_check[1])
         exit
       end
       status = model.start_operation('Adding attribute', true)
@@ -188,11 +224,9 @@ end  # module AddAttributes
 # Create menu items
 unless file_loaded?(__FILE__)
   # Create toolbar
-  plugins = Sketchup.find_support_file "Plugins/"
-  icons_folder = "add_attribute/icons/"
-  add_attribute_tb = UI::Toolbar.new("Add attribute")
-  icon_s_inputbox_attributes = File.join(plugins, icons_folder, "inputbox_attributes_16.png")
-  icon_inputbox_attributes = File.join(plugins, icons_folder, "inputbox_attributes_24.png")
+  add_attribute_tb = UI::Toolbar.new(AddAttributes::PLUGIN_NAME)
+  icon_s_inputbox_attributes = File.join(AddAttributes::PATH_ICONS, 'inputbox_attributes_16.png')
+  icon_inputbox_attributes = File.join(AddAttributes::PATH_ICONS, 'inputbox_attributes_24.png')
 
   # Add item "inputbox_attributes"
   inputbox_attributes_cmd = UI::Command.new("Adding new attribute from inputbox"){ AddAttributes::inputbox_attributes }
@@ -204,7 +238,7 @@ unless file_loaded?(__FILE__)
   add_attribute_tb.add_item(inputbox_attributes_cmd)
 
   # Create menu
-  add_attribute = UI.menu("Plugins").add_submenu("Add attribute")
+  add_attribute = UI.menu("Plugins").add_submenu(AddAttributes::PLUGIN_NAME)
   add_attribute.add_item("Add attributes inputbox"){ AddAttributes::inputbox_attributes }
   file_loaded(__FILE__)
 end
