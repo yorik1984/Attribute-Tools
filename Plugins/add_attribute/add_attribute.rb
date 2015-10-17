@@ -181,7 +181,7 @@ module AddAttributes
                  "Value",
                  "Units",
                  "Display rule",
-                 "List Option (Opt1=Val1\&Opt2=Val2)",
+                 "List Option (Opt1=Val1&&Opt2=Val2)",
                  "Toggle Units",
                  "Duplicate attribute name"]
       defaults = ["",
