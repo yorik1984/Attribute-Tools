@@ -119,7 +119,7 @@ module AddAttributes
                                STRING: "Text",
                                INCHES: "Inches",
                           CENTIMETERS: "Centimeters" }
-    attributes_units = { DEFAULT: "End user\'s model units",
+    attributes_units = { DEFAULT: "End user's model units",
                          INTEGER: "Whole Number",
                            FLOAT: "Decimal Number",
                          PERCENT: "Percentage",
@@ -140,15 +140,15 @@ module AddAttributes
                           VIEW: "User can see this attribute",
                        TEXTBOX: "User can edit as a textbox",
                           LIST: "User can select from a list" }
-    entity.set_attribute 'dynamic_attributes', '_' + input[0] +'_label', input[0]
-    entity.set_attribute 'dynamic_attributes', ('_' + input[0] + '_formlabel'), input[1]
-    entity.set_attribute 'dynamic_attributes', '_' + input[0] +'_units', attributes_units.key(input[2]).to_s
-    entity.set_attribute 'dynamic_attributes', '_' + input[0] + '_formulaunits', attributes_formulaunits.key(input[4]).to_s
-    entity.set_attribute'dynamic_attributes', '_' + input[0] + '_access', attributes_access.key(input[5]).to_s
+    entity.set_attribute "dynamic_attributes", "_" + input[0] +"_label", input[0]
+    entity.set_attribute "dynamic_attributes", ("_" + input[0] + "_formlabel"), input[1]
+    entity.set_attribute "dynamic_attributes", "_" + input[0] +"_units", attributes_units.key(input[2]).to_s
+    entity.set_attribute "dynamic_attributes", "_" + input[0] + "_formulaunits", attributes_formulaunits.key(input[4]).to_s
+    entity.set_attribute"dynamic_attributes", "_" + input[0] + "_access", attributes_access.key(input[5]).to_s
     if input[6] != nil
-      entity.set_attribute 'dynamic_attributes' , '_' + input[0] + '_options', input[6]
+      entity.set_attribute "dynamic_attributes" , "_" + input[0] + "_options", input[6]
     end
-    entity.set_attribute 'dynamic_attributes', '_lengthunits', input[7]
+    entity.set_attribute "dynamic_attributes", "_lengthunits", input[7]
     case input[2].to_s
     when "Millimeters"
       result_units = input[3].to_f*(1.to_inch/1.to_mm)
@@ -159,7 +159,7 @@ module AddAttributes
     else
       result_units = input[3]
     end
-    entity.set_attribute 'dynamic_attributes', input[0], result_units
+    entity.set_attribute "dynamic_attributes", input[0], result_units
   end #set_attributes
 
   def self.recursive_set_attributes(selection, input)
@@ -186,7 +186,7 @@ module AddAttributes
                  "Duplicate attribute name"]
       defaults = ["",
                   "",
-                  "End user\'s model units",
+                  "End user's model units",
                   "",
                   "Text",
                   "User cannot see this attribure",
@@ -195,7 +195,7 @@ module AddAttributes
                   "Ignore"]
       list = ["",
               "",
-              "End user\'s model units|Whole Number|Decimal Number|Percentage|True/False|Text|Inches|Decimal Feet|Millimeters|Centimeters|Meters|Degrees|Dollars|Euros|Yen|Pounds (weight)|Kilograms",
+              "End user's model units|Whole Number|Decimal Number|Percentage|True/False|Text|Inches|Decimal Feet|Millimeters|Centimeters|Meters|Degrees|Dollars|Euros|Yen|Pounds (weight)|Kilograms",
               "",
               "Decimal Number|Text|Inches|Centimeters",
               "User cannot see this attribure|User can see this attribure|User can edit as a textbox|User can select from a list",
@@ -225,8 +225,8 @@ end  # module AddAttributes
 unless file_loaded?(__FILE__)
   # Create toolbar
   add_attribute_tb = UI::Toolbar.new(AddAttributes::PLUGIN_NAME)
-  icon_s_inputbox_attributes = File.join(AddAttributes::PATH_ICONS, 'inputbox_attributes_16.png')
-  icon_inputbox_attributes = File.join(AddAttributes::PATH_ICONS, 'inputbox_attributes_24.png')
+  icon_s_inputbox_attributes = File.join(AddAttributes::PATH_ICONS, "inputbox_attributes_16.png")
+  icon_inputbox_attributes = File.join(AddAttributes::PATH_ICONS, "inputbox_attributes_24.png")
 
   # Add item "inputbox_attributes"
   inputbox_attributes_cmd = UI::Command.new("Adding new attribute from inputbox"){ AddAttributes::inputbox_attributes }
