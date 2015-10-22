@@ -68,7 +68,8 @@ module AddAttributes
       nil
     end
 
-    if input[0].to_l
+    regex_digits = /[#{input.gsub(/\d/)}]/
+    if input[0].to_s =~ regex_digits
       valid_status[0] = false
       valid_status[1] = status_error[:NUMBER_IN_BEGIN]
       return valid_status
@@ -141,7 +142,7 @@ module AddAttributes
                        TEXTBOX: "User can edit as a textbox",
                           LIST: "User can select from a list" }
     entity.set_attribute "dynamic_attributes", "_" + input[0] +"_label", input[0]
-    entity.set_attribute "dynamic_attributes", ("_" + input[0] + "_formlabel"), input[1]
+    entity.set_attribute "dynamic_attributes", "_" + input[0] + "_formlabel", input[1]
     entity.set_attribute "dynamic_attributes", "_" + input[0] +"_units", attributes_units.key(input[2]).to_s
     entity.set_attribute "dynamic_attributes", "_" + input[0] + "_formulaunits", attributes_formulaunits.key(input[4]).to_s
     entity.set_attribute"dynamic_attributes", "_" + input[0] + "_access", attributes_access.key(input[5]).to_s
@@ -189,7 +190,7 @@ module AddAttributes
                   "End user's model units",
                   "",
                   "Text",
-                  "User cannot see this attribure",
+                  "User cannot see this attribute",
                   "",
                   "CENTIMETERS",
                   "Ignore"]
@@ -198,7 +199,7 @@ module AddAttributes
               "End user's model units|Whole Number|Decimal Number|Percentage|True/False|Text|Inches|Decimal Feet|Millimeters|Centimeters|Meters|Degrees|Dollars|Euros|Yen|Pounds (weight)|Kilograms",
               "",
               "Decimal Number|Text|Inches|Centimeters",
-              "User cannot see this attribure|User can see this attribure|User can edit as a textbox|User can select from a list",
+              "User cannot see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
               "",
               "INCHES|CENTIMETERS",
               "Ignore|Replace"]
