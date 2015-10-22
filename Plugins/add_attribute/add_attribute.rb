@@ -52,8 +52,8 @@ module AddAttributes
     end
 
     special = "?<>',./[]=-)(*&^%$#`~{}\""
-    regex = /[#{special.gsub(/./){|char| "\\#{char}"}}]/
-    if input =~ regex
+    regex_special = /[#{special.gsub(/./){|char| "\\#{char}"}}]/
+    if input =~ regex_special
       valid_status[0] = false
       valid_status[1] = status_error[:NOT_LETTER_OR_NUMBER]
       return valid_status
