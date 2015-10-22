@@ -43,8 +43,7 @@ module AddAttributes
       nil
     end
 
-    special_space = " "
-    regex_space = /[#{special_space.gsub(/./){|char| "\\#{char}"}}]/
+    regex_space = /(\s)/
     if input =~ regex_space
       valid_status[0] = false
       valid_status[1] = status_error[:CONTAIN_SPACES]
@@ -68,8 +67,8 @@ module AddAttributes
       nil
     end
 
-    regex_digits = /[#{input.gsub(/\d/)}]/
-    if input[0].to_s =~ regex_digits
+    regex_digits = /(\d)/
+    if input[0].to_s=~ regex_digits
       valid_status[0] = false
       valid_status[1] = status_error[:NUMBER_IN_BEGIN]
       return valid_status
