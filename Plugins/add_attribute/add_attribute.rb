@@ -247,7 +247,8 @@ module AddAttributes
         UI.messagebox("Хорошо")
       end
       status = model.start_operation('Adding attribute', true)
-      case input.last.to_s
+      recursive_status = input.last
+      case recursive_status.to_s
       when "Yes"
         self.recursive_set_attributes(selection, input)
       when "No"
