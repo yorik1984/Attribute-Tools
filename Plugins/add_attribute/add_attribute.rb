@@ -183,7 +183,8 @@ module AddAttributes
                  "Display rule",
                  "List Option (Opt1=Val1&&Opt2=Val2)",
                  "Toggle Units",
-                 "Duplicate attribute name"]
+                 "Duplicate attribute name",
+                  "Recursive adding attribute(s)"]
       defaults = ["",
                   "",
                   "End user's model units",
@@ -192,7 +193,8 @@ module AddAttributes
                   "User cannot see this attribute",
                   "",
                   "CENTIMETERS",
-                  "Ignore"]
+                  "Ignore",
+                   "No"]
       list = ["",
               "",
               "End user's model units|Whole Number|Decimal Number|Percentage|True/False|Text|Inches|Decimal Feet|Millimeters|Centimeters|Meters|Degrees|Dollars|Euros|Yen|Pounds (weight)|Kilograms",
@@ -201,7 +203,8 @@ module AddAttributes
               "User cannot see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
               "",
               "INCHES|CENTIMETERS",
-              "Ignore|Replace"]
+              "Ignore|Replace",
+               "Yes|No"]
       input = UI.inputbox(prompts, defaults, list, "Input attributes")
       input_check = self.valid_attribute_name(selection, input[0])
       if !input_check[0]
@@ -209,14 +212,16 @@ module AddAttributes
         exit
       end
       status = model.start_operation('Adding attribute', true)
-      answer = UI.messagebox("Do you want recursive adding attribute(s)?", MB_YESNO)
-      if answer == IDYES
+      case input[9]
+      when "Yes"
         self.recursive_set_attributes(selection, input)
-      else
+      when "No"
         selection.each { |entity| self.set_attributes(entity, input) }
+      else
+        exit
       end
       model.commit_operation
-    end
+    end # inputbox_attributes
   end
 
 end  # module AddAttributes
