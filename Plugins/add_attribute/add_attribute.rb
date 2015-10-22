@@ -25,7 +25,21 @@ require 'sketchup.rb'
 
 module AddAttributes
 
-  def self.valid_attribute_name(selection, input)
+  # class AddAttribute
+
+  #   def initialize(args)
+
+  #   end
+
+  #   attr_accessor :da_label, :da_formlabel, :da_units, :da_formulaunits, :da_access, :da_options, :da_lengthunits, :da_name_label, :da_summary_label, :da_description_label, :da_itemcode_label, :da_x_label, :da_y_label, :da_z_label, :da_lenx_label, :da_leny_label, :da_lenz_label, :da_rotx_label, :da_roty_label, :da_rotz_label, :da_material_label, :da_scaletool_label, :da_hidden_label, :da_onclick_label, :da_copies_label, :da_imageurl_label, :da_dialogwidth_label, :da_dialogheight_label
+
+  #   def method_name
+
+  #   end
+
+  # end #class AddAttribute
+
+  def self.valid_attribute_name(input)
     #Inspect attribute name
     valid_status = []
     status_error = { NO_ERROR: "Input attribute name correct",
@@ -171,58 +185,81 @@ module AddAttributes
     end
   end
 
+  def self.inputbox_custom_attribute(custom_attribute)
+   prompts = ["Name",
+              "Display label",
+              "Display in",
+              "Value",
+              "Units",
+              "Display rule",
+              "List Option (Opt1=Val1&&Opt2=Val2)",
+              "Toggle Units",
+              "Duplicate attribute name",
+               "Recursive adding attribute(s)"]
+    defaults = [custom_attribute,
+                "",
+                "End user's model units",
+                "",
+                "Text",
+                "User cannot see this attribute",
+                "",
+                "CENTIMETERS",
+                "Ignore",
+                 "No"]
+    list = [custom_attribute,
+            "",
+            "End user's model units|Whole Number|Decimal Number|Percentage|True/False|Text|Inches|Decimal Feet|Millimeters|Centimeters|Meters|Degrees|Dollars|Euros|Yen|Pounds (weight)|Kilograms",
+            "",
+            "Decimal Number|Text|Inches|Centimeters",
+            "User cannot see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
+            "",
+            "INCHES|CENTIMETERS",
+            "Ignore|Replace",
+             "Yes|No"]
+    input_custom_attribute = UI.inputbox(prompts, defaults, list, "Input custom attributes")
+  end # inputbox_custom_attribute
+
   def self.inputbox_attributes
     model = Sketchup.active_model
     selection = model.selection
+    input = []
     if select_components_messagebox?(selection)
-      prompts = ["Name (String)",
-                 "Display label",
-                 "Display in",
-                 "Value",
-                 "Units",
-                 "Display rule",
-                 "List Option (Opt1=Val1&&Opt2=Val2)",
-                 "Toggle Units",
-                 "Duplicate attribute name",
-                  "Recursive adding attribute(s)"]
-      defaults = ["",
-                  "",
-                  "End user's model units",
-                  "",
-                  "Text",
-                  "User cannot see this attribute",
-                  "",
-                  "CENTIMETERS",
-                  "Ignore",
-                   "No"]
-      list = ["",
-              "",
-              "End user's model units|Whole Number|Decimal Number|Percentage|True/False|Text|Inches|Decimal Feet|Millimeters|Centimeters|Meters|Degrees|Dollars|Euros|Yen|Pounds (weight)|Kilograms",
-              "",
-              "Decimal Number|Text|Inches|Centimeters",
-              "User cannot see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
-              "",
-              "INCHES|CENTIMETERS",
-              "Ignore|Replace",
-               "Yes|No"]
-      input = UI.inputbox(prompts, defaults, list, "Input attributes")
-      input_check = self.valid_attribute_name(selection, input[0])
-      if !input_check[0]
-        UI.messagebox("Failure!"+ "\n" + input_check[1])
-        exit
+      prompts = ["Attribute Name"]
+      defaults = ["Custom..."]
+      list = ["Custom...|Name|Summary|Description|ItemCode|X|Y|Z|LenX|LenY|LenZ|RotX|RotY|RotZ|Material|ScaleTool|Hidden|onClick|Copies|ImageURL|DialogWidth|DialogHeight"]
+      choice_attributes = UI.inputbox(prompts, defaults, list, "Choice attributes")
+      choice = choice_attributes[0].to_s
+      case choice
+      when "Custom..."
+        input_check = []
+        input_check[0] = false
+        until input_check[0]
+          custom_name = UI.inputbox(["Custom attribute name (String)"], [""], [""], "Custom attribute name")
+          input_check = self.valid_attribute_name(custom_name[0])
+          if !input_check[0]
+            UI.messagebox("Failure!"+ "\n" + input_check[1])
+          end
+        end
+        input = self.inputbox_custom_attribute(custom_name[0])
+      when "Name" || "Summary" || "Description" || "ItemCode"
+        UI.messagebox("Очень Хорошо")
+      else
+        UI.messagebox("Хорошо")
       end
       status = model.start_operation('Adding attribute', true)
-      case input[9]
+      case input.last.to_s
       when "Yes"
         self.recursive_set_attributes(selection, input)
       when "No"
         selection.each { |entity| self.set_attributes(entity, input) }
       else
-        exit
+        nil
       end
       model.commit_operation
-    end # inputbox_attributes
-  end
+    else
+      nil
+    end
+  end # inputbox_attributes
 
 end  # module AddAttributes
 
