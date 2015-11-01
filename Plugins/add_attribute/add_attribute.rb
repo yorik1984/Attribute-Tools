@@ -25,81 +25,293 @@ require 'sketchup.rb'
 
 module AddAttributes
 
-  # class AddAttribute
+  class AddAttributeInputbox
 
-  #   def initialize(args)
+    attr_accessor :prompts, :defaults, :list, :inputbox_window_name
 
-  #   end
-
-  #   attr_accessor :da_label, :da_formlabel, :da_units, :da_formulaunits, :da_access, :da_options, :da_lengthunits, :da_name_label, :da_summary_label, :da_description_label, :da_itemcode_label, :da_x_label, :da_y_label, :da_z_label, :da_lenx_label, :da_leny_label, :da_lenz_label, :da_rotx_label, :da_roty_label, :da_rotz_label, :da_material_label, :da_scaletool_label, :da_hidden_label, :da_onclick_label, :da_copies_label, :da_imageurl_label, :da_dialogwidth_label, :da_dialogheight_label
-
-  #   def method_name
-
-  #   end
-
-  # end #class AddAttribute
-
-  def self.valid_attribute_name(input)
-    #Inspect attribute name
-    valid_status = []
-    status_error = { NO_ERROR: "Input attribute name correct",
-                  EMPTY_FIELD: "Attribute name cannot be empty",
-               CONTAIN_SPACES: "Attribute name cannot contain spaces",
-         NOT_LETTER_OR_NUMBER: "Attribute name can only contain letters and numbers",
-                   UNDERSCOPE: "Attribute name cannot begin with an underscore",
-              NUMBER_IN_BEGIN: "Attribute name cannot begin with an number",
-                TRUE_OR_FALSE: "You may not name an attribute TRUE or FALSE" }
-
-    if input.to_s == ""
-      valid_status[0] = false
-      valid_status[1] = status_error[:EMPTY_FIELD]
-      return valid_status
-      nil
+    def initialize
+      @prompts_all = { label: "Name",
+                   formlabel: "Display label",
+                       units: "Display in",
+                       value: "Value",
+                formulaunits: "Units",
+                      access: "Display rule",
+                     options: "List Option (Opt1=Val1&&Opt2=Val2)",
+                 lengthunits: "Toggle Units",
+                   duplicate: "Duplicate attribute name",
+                   recurcive: "Recursive adding attribute(s)",
+                     scale_x: "Scale along red. (X)",
+                     scale_y: "Scale along green. (Y)",
+                     scale_z: "Scale along blue. (Z)",
+                   scale_x_z: "Scale in red/blue plane. (X+Z)",
+                   scale_y_z: "Scale in green/blue plane. (Y+Z)",
+                   scale_x_y: "Scale in red/green plane. (X+Y)",
+                 scale_x_y_z: "Scale uniform (from corners). (XYZ)" }
+      @prompts = [ @prompts_all[:label],
+                   @prompts_all[:formlabel],
+                   @prompts_all[:units],
+                   @prompts_all[:value],
+                   @prompts_all[:formulaunits],
+                   @prompts_all[:access],
+                   @prompts_all[:options],
+                   @prompts_all[:lengthunits] ]
+      @defaults = ["",
+                  "",
+                  "End user's model units",
+                  "",
+                  "Text",
+                  "User cannot see this attribute",
+                  "",
+                  "CENTIMETERS" ]
+      @list = ["",
+              "",
+              "End user's model units|Whole Number|Decimal Number|Percentage|True/False|Text|Inches|Decimal Feet|Millimeters|Centimeters|Meters|Degrees|Dollars|Euros|Yen|Pounds (weight)|Kilograms",
+              "",
+              "Decimal Number|Text|Inches|Centimeters",
+              "User cannot see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
+              "",
+              "INCHES|CENTIMETERS" ]
+      @inputbox_window_name = "Input attributes"
     end
 
-    regex_space = /(\s)/
-    if input =~ regex_space
-      valid_status[0] = false
-      valid_status[1] = status_error[:CONTAIN_SPACES]
+    def valid_attribute_name(input)
+      #Inspect attribute name
+      valid_status = []
+      status_error = { NO_ERROR: "Input attribute name correct",
+                    EMPTY_FIELD: "Attribute name cannot be empty",
+                 CONTAIN_SPACES: "Attribute name cannot contain spaces",
+           NOT_LETTER_OR_NUMBER: "Attribute name can only contain letters and numbers",
+                     UNDERSCOPE: "Attribute name cannot begin with an underscore",
+                NUMBER_IN_BEGIN: "Attribute name cannot begin with an number",
+                  TRUE_OR_FALSE: "You may not name an attribute TRUE or FALSE" }
+
+      if input.to_s == ""
+        valid_status[0] = false
+        valid_status[1] = status_error[:EMPTY_FIELD]
+        return valid_status
+        nil
+      end
+
+      regex_space = /(\s)/
+      if input =~ regex_space
+        valid_status[0] = false
+        valid_status[1] = status_error[:CONTAIN_SPACES]
+        return valid_status
+        nil
+      end
+
+      special = "?<>',./[]=-)(*&^%$#`~{}\""
+      regex_special = /[#{special.gsub(/./){|char| "\\#{char}"}}]/
+      if input =~ regex_special
+        valid_status[0] = false
+        valid_status[1] = status_error[:NOT_LETTER_OR_NUMBER]
+        return valid_status
+        nil
+      end
+
+       if input[0].to_s == "_"
+        valid_status[0] = false
+        valid_status[1] = status_error[:UNDERSCOPE]
+        return valid_status
+        nil
+      end
+
+      regex_digits = /(\d)/
+      if input[0].to_s=~ regex_digits
+        valid_status[0] = false
+        valid_status[1] = status_error[:NUMBER_IN_BEGIN]
+        return valid_status
+        nil
+      end
+
+      if input.downcase == "true" || input.downcase == "false"
+        valid_status[0] = false
+        valid_status[1] = status_error[:TRUE_OR_FALSE]
+        return valid_status
+        nil
+      end
+
+      valid_status[0] = true
+      valid_status[1] = status_error[:NO_ERROR]
       return valid_status
-      nil
+    end # valid_attribute_name
+
+    def inputbox(choice)
+      case choice
+      when "Custom..."
+        input_check = []
+        input_check[0] = false
+        until input_check[0]
+          custom_name = UI.inputbox(["Custom attribute name (String)"], [""], [""], "Custom attribute name")
+          input_check = valid_attribute_name(custom_name[0])
+          if !input_check[0]
+            UI.messagebox("Failure!"+ "\n" + input_check[1])
+          end
+        end
+        @inputbox_window_name = "Input custom attribute"
+        @defaults[0] = custom_name[0]
+        @list[0] = custom_name[0]
+      when "Name", "Summary", "Description", "ItemCode"
+        @inputbox_window_name = "Input Component Info attribute " + choice
+        @prompts = [ @prompts_all[:label],
+                     @prompts_all[:value],
+                     @prompts_all[:access] ]
+        @defaults = [ choice,
+                      "",
+                      "User can see this attribute" ]
+        @list = [ choice,
+                  "",
+                  "User can see this attribute" ]
+      when "X","Y","Z","LenX","LenY", "LenZ"
+        if choice == "X" || choice == "Y" || choice == "Z"
+          @inputbox_window_name = "Input Position attribute " + choice
+        else
+          @inputbox_window_name = "Input Size attribute " + choice
+        end
+        @defaults[0] = choice
+        @defaults[2] = "Millimeters"
+        @defaults[4] = "Centimeters"
+        @list[0] = choice
+        @list[2] = "End user's model units|Inches|Decimal Feet|Millimeters|Centimeters|Meters"
+        @list[4] = "Inches|Centimeters"
+      when "RotX", "RotY", "RotZ"
+        @inputbox_window_name = "Input Rotation attribute " + choice
+        @prompts = [ @prompts_all[:label],
+                     @prompts_all[:formlabel],
+                     @prompts_all[:units],
+                     @prompts_all[:value],
+                     @prompts_all[:access],
+                     @prompts_all[:options] ]
+        @defaults = [ choice,
+                      "",
+                      "Degrees",
+                      "",
+                      "User cannot see this attribute",
+                      "" ]
+        @list = [ choice,
+                  "",
+                  "Degrees",
+                  "",
+                  "User cannot see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
+                  "" ]
+      when "Material"
+        @inputbox_window_name = "Input Behaviors attribute " + choice
+        @prompts = [ @prompts_all[:label],
+                     @prompts_all[:formlabel],
+                     @prompts_all[:units],
+                     @prompts_all[:value],
+                     @prompts_all[:access],
+                     @prompts_all[:options] ]
+        @defaults = [ choice,
+                      "",
+                      "Text",
+                      "",
+                      "User cannot see this attribute",
+                      "" ]
+        @list = [ choice,
+                  "",
+                  "Text",
+                  "",
+                  "User cannot see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
+                  "" ]
+      when "ScaleTool"
+        @inputbox_window_name = "Input Behaviors attribute " + choice
+        @prompts = [ @prompts_all[:label],
+                     @prompts_all[:access],
+                     @prompts_all[:scale_x],
+                     @prompts_all[:scale_y],
+                     @prompts_all[:scale_z],
+                     @prompts_all[:scale_x_z],
+                     @prompts_all[:scale_y_z],
+                     @prompts_all[:scale_x_y],
+                     @prompts_all[:scale_x_y_z] ]
+        @defaults = [ choice,
+                      "User cannot see this attribute",
+                      "Yes",
+                      "Yes",
+                      "Yes",
+                      "Yes",
+                      "Yes",
+                      "Yes",
+                      "Yes" ]
+        @list = [ choice,
+                  "User cannot see this attribute",
+                  "Yes|No",
+                  "Yes|No",
+                  "Yes|No",
+                  "Yes|No",
+                  "Yes|No",
+                  "Yes|No",
+                  "Yes|No" ]
+      when "Hidden"
+        @inputbox_window_name = "Input Behaviors attribute " + choice
+        @prompts = [ @prompts_all[:label],
+                     @prompts_all[:value],
+                     @prompts_all[:access] ]
+        @defaults = [ choice,
+                      "FALSE",
+                      "User cannot see this attribute" ]
+        @list = [ choice,
+                  "",
+                  "User cannot see this attribute" ]
+      when "onClick"
+        @inputbox_window_name = "Input Behaviors attribute " + choice
+        @prompts_all[:formlabel] = "Tool tip"
+        @prompts = [ @prompts_all[:label],
+                     @prompts_all[:formlabel],
+                     @prompts_all[:value],
+                     @prompts_all[:access] ]
+        @defaults = [ choice,
+                      "Click to activate",
+                      "",
+                      "User cannot see this attribute" ]
+        @list = [ choice,
+                  "",
+                  "",
+                  "User cannot see this attribute" ]
+      when "Copies", "ImageURL"
+        if choice == "Copies"
+          @inputbox_window_name = "Input Behaviors attribute " + choice
+        else
+          @inputbox_window_name = "Input Form Design attribute " + choice
+        end
+        @prompts = [ @prompts_all[:label],
+                     @prompts_all[:value],
+                     @prompts_all[:access] ]
+        @defaults = [ choice,
+                      "",
+                      "User cannot see this attribute" ]
+        @list = [ choice,
+                  "",
+                  "User cannot see this attribute" ]
+      when "DialogWidth", "DialogHeight"
+        @inputbox_window_name = "Input Form Design attribute " + choice
+        @prompts = [ @prompts_all[:label],
+                     @prompts_all[:value],
+                     @prompts_all[:access] ]
+        @defaults = [ choice,
+                      "400",
+                      "User cannot see this attribute" ]
+        @list = [ choice,
+                  "",
+                  "User cannot see this attribute" ]
+      else
+        UI.messagebox("Failure")
+      end # case choice
+      @prompts = @prompts + [ @prompts_all[:duplicate], @prompts_all[:recurcive] ]
+      @defaults = @defaults + [ "Ignore", "No" ]
+      @list = @list + [ "Ignore|Replace", "Yes|No" ]
+      @inputbox = UI.inputbox(@prompts, @defaults, @list, @inputbox_window_name)
+      input_labels = {}
+      @inputbox.count.times do |i|
+        temp = { @prompts_all.key(@prompts[i]) => @inputbox[i] }
+        input_labels = input_labels.merge(temp)
+      end
+      return input_labels
     end
 
-    special = "?<>',./[]=-)(*&^%$#`~{}\""
-    regex_special = /[#{special.gsub(/./){|char| "\\#{char}"}}]/
-    if input =~ regex_special
-      valid_status[0] = false
-      valid_status[1] = status_error[:NOT_LETTER_OR_NUMBER]
-      return valid_status
-      nil
-    end
+  end #class AddAttribute
 
-     if input[0].to_s == "_"
-      valid_status[0] = false
-      valid_status[1] = status_error[:UNDERSCOPE]
-      return valid_status
-      nil
-    end
-
-    regex_digits = /(\d)/
-    if input[0].to_s=~ regex_digits
-      valid_status[0] = false
-      valid_status[1] = status_error[:NUMBER_IN_BEGIN]
-      return valid_status
-      nil
-    end
-
-    if input.downcase == "true" || input.downcase == "false"
-      valid_status[0] = false
-      valid_status[1] = status_error[:TRUE_OR_FALSE]
-      return valid_status
-      nil
-    end
-
-    valid_status[0] = true
-    valid_status[1] = status_error[:NO_ERROR]
-    return valid_status
-  end # valid_attribute_name
 
   def self.get_definition(entity)
     if entity.is_a?(Sketchup::ComponentInstance)
@@ -128,7 +340,28 @@ module AddAttributes
     true
   end
 
- def self.set_attributes(entity ,input)
+  def self.set_attributes(entity ,input)
+    label_std = { name: "Name",
+                summary: "Summary",
+            description: "Description",
+               itemcode: "ItemCode",
+                      x: "X",
+                      y: "Y",
+                      z: "Z",
+                   lenx: "LenX",
+                   leny: "LenY",
+                   lenz: "LenZ",
+                   rotx: "RotX",
+                   roty: "RotY",
+                   rotz: "RotZ",
+               material: "Material",
+              scaletool: "ScaleTool",
+                  hidden: "Hidden",
+                 onclick: "onClick",
+                  copies: "Copies",
+               imageurl: "ImageURL",
+            dialogwidth: "DialogWidth",
+            dialogheight: "DialogHeight" }
     attributes_formulaunits = { FLOAT: "Decimal Number",
                                STRING: "Text",
                                INCHES: "Inches",
@@ -154,26 +387,46 @@ module AddAttributes
                           VIEW: "User can see this attribute",
                        TEXTBOX: "User can edit as a textbox",
                           LIST: "User can select from a list" }
-    entity.set_attribute "dynamic_attributes", "_" + input[0] +"_label", input[0]
-    entity.set_attribute "dynamic_attributes", "_" + input[0] + "_formlabel", input[1]
-    entity.set_attribute "dynamic_attributes", "_" + input[0] +"_units", attributes_units.key(input[2]).to_s
-    entity.set_attribute "dynamic_attributes", "_" + input[0] + "_formulaunits", attributes_formulaunits.key(input[4]).to_s
-    entity.set_attribute"dynamic_attributes", "_" + input[0] + "_access", attributes_access.key(input[5]).to_s
-    if input[6] != nil
-      entity.set_attribute "dynamic_attributes" , "_" + input[0] + "_options", input[6]
-    end
-    entity.set_attribute "dynamic_attributes", "_lengthunits", input[7]
-    case input[2].to_s
-    when "Millimeters"
-      result_units = input[3].to_f*(1.to_inch/1.to_mm)
-    when "Centimeters"
-      result_units = input[3].to_f*(1.to_inch/1.to_cm)
-    when "Meters"
-      result_units = input[3].to_f*(1.to_inch/1.to_m)
+    if label_std.has_value?(input[:label])
+      label_input =  label_std.key(input[:label]).to_s
     else
-      result_units = input[3]
+      label_input = input[:label]
     end
-    entity.set_attribute "dynamic_attributes", input[0], result_units
+    entity.set_attribute "dynamic_attributes", "_#{label_input}_label", input[:label]
+    entity.set_attribute"dynamic_attributes", "_#{label_input}_access", attributes_access.key(input[:access]).to_s
+    if input[:label] == label_std[:scaletool]
+      scaletool_binary = ""
+      input.each_value do |value|
+        scaletool_binary = scaletool_binary + "0" if value == "Yes" && input.key(value) != :recurcive
+        scaletool_binary = scaletool_binary + "1" if value == "No" && input.key(value) != :recurcive
+      end
+      scaletool_dec = scaletool_binary.reverse.to_i(2)
+      entity.set_attribute "dynamic_attributes", "scaletool", scaletool_dec
+    end
+    if input.has_key?(:formlabel)
+      entity.set_attribute "dynamic_attributes", "_#{label_input}_formlabel", input[:formlabel]
+    end
+    if input.has_key?(:units)
+      entity.set_attribute "dynamic_attributes", "_#{label_input}_units", attributes_units.key(input[:units]).to_s
+      case input[:units].to_s
+      when "Millimeters"
+        result_units = input[:value].to_f*(1.to_inch/1.to_mm)
+      when "Centimeters"
+        result_units = input[:value].to_f*(1.to_inch/1.to_cm)
+      when "Meters"
+        result_units = input[:value].to_f*(1.to_inch/1.to_m)
+      else
+        result_units = input[:value]
+      end
+      entity.set_attribute "dynamic_attributes", label_input, result_units
+    end
+    if input.has_key?(:formulaunits)
+      entity.set_attribute "dynamic_attributes", "_#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
+    end
+    if input[:options] != nil
+      entity.set_attribute "dynamic_attributes" , "_#{label_input}_options", input[:options]
+    end
+    entity.set_attribute "dynamic_attributes", "_lengthunits", input[:lengthunits]
   end #set_attributes
 
   def self.recursive_set_attributes(selection, input)
@@ -185,75 +438,29 @@ module AddAttributes
     end
   end
 
-  def self.inputbox_custom_attribute(custom_attribute)
-   prompts = ["Name",
-              "Display label",
-              "Display in",
-              "Value",
-              "Units",
-              "Display rule",
-              "List Option (Opt1=Val1&&Opt2=Val2)",
-              "Toggle Units",
-              "Duplicate attribute name",
-               "Recursive adding attribute(s)"]
-    defaults = [custom_attribute,
-                "",
-                "End user's model units",
-                "",
-                "Text",
-                "User cannot see this attribute",
-                "",
-                "CENTIMETERS",
-                "Ignore",
-                 "No"]
-    list = [custom_attribute,
-            "",
-            "End user's model units|Whole Number|Decimal Number|Percentage|True/False|Text|Inches|Decimal Feet|Millimeters|Centimeters|Meters|Degrees|Dollars|Euros|Yen|Pounds (weight)|Kilograms",
-            "",
-            "Decimal Number|Text|Inches|Centimeters",
-            "User cannot see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
-            "",
-            "INCHES|CENTIMETERS",
-            "Ignore|Replace",
-             "Yes|No"]
-    input_custom_attribute = UI.inputbox(prompts, defaults, list, "Input custom attributes")
-  end # inputbox_custom_attribute
-
   def self.inputbox_attributes
     model = Sketchup.active_model
     selection = model.selection
-    input = []
     if select_components_messagebox?(selection)
+      input = []
       prompts = ["Attribute Name"]
       defaults = ["Custom..."]
       list = ["Custom...|Name|Summary|Description|ItemCode|X|Y|Z|LenX|LenY|LenZ|RotX|RotY|RotZ|Material|ScaleTool|Hidden|onClick|Copies|ImageURL|DialogWidth|DialogHeight"]
       choice_attributes = UI.inputbox(prompts, defaults, list, "Choice attributes")
       choice = choice_attributes[0].to_s
-      case choice
-      when "Custom..."
-        input_check = []
-        input_check[0] = false
-        until input_check[0]
-          custom_name = UI.inputbox(["Custom attribute name (String)"], [""], [""], "Custom attribute name")
-          input_check = self.valid_attribute_name(custom_name[0])
-          if !input_check[0]
-            UI.messagebox("Failure!"+ "\n" + input_check[1])
-          end
-        end
-        input = self.inputbox_custom_attribute(custom_name[0])
-      when "Name" || "Summary" || "Description" || "ItemCode"
-        UI.messagebox("Очень Хорошо")
-      else
-        UI.messagebox("Хорошо")
-      end
+      attribute_inputbox = AddAttributeInputbox.new
+      input = attribute_inputbox.inputbox(choice)
       status = model.start_operation('Adding attribute', true)
-      recursive_status = input.last
-      case recursive_status.to_s
+      recursive_status = input[:recurcive].to_s
+      puts input
+      puts input[:recurcive].to_s
+      case recursive_status
       when "Yes"
         self.recursive_set_attributes(selection, input)
       when "No"
         selection.each { |entity| self.set_attributes(entity, input) }
       else
+        puts "Failure"
         nil
       end
       model.commit_operation
@@ -262,7 +469,7 @@ module AddAttributes
     end
   end # inputbox_attributes
 
-end  # module AddAttributes
+end # module AddAttributes
 
 # Create menu items
 unless file_loaded?(__FILE__)
