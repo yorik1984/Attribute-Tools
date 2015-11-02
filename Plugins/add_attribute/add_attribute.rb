@@ -72,6 +72,7 @@ module AddAttributes
               "",
               "INCHES|CENTIMETERS" ]
       @inputbox_window_name = "Input attributes"
+      @inputbox = []
     end
 
     def valid_attribute_name(input)
@@ -137,8 +138,7 @@ module AddAttributes
     end # valid_attribute_name
 
     def inputbox(choice)
-      case choice
-      when "Custom..."
+      if choice == "Custom..."
         input_check = []
         input_check[0] = false
         until input_check[0]
@@ -148,9 +148,16 @@ module AddAttributes
             UI.messagebox("Failure!"+ "\n" + input_check[1])
           end
         end
-        @inputbox_window_name = "Input custom attribute"
-        @defaults[0] = custom_name[0]
-        @list[0] = custom_name[0]
+        custom_is_standart = standart_attribute(custom_name[0])
+        if custom_is_standart[0]
+          choice = custom_is_standart[1]
+        else
+          @inputbox_window_name = "Input Custom attribute"
+          @defaults[0] = custom_name[0]
+          @list[0] = custom_name[0]
+        end
+      end
+      case choice
       when "Name", "Summary", "Description", "ItemCode"
         @inputbox_window_name = "Input Component Info attribute " + choice
         @prompts = [ @prompts_all[:label],
@@ -296,22 +303,55 @@ module AddAttributes
                   "",
                   "User cannot see this attribute" ]
       else
-        UI.messagebox("Failure")
+        puts"Failure case choice"
       end # case choice
       @prompts = @prompts + [ @prompts_all[:duplicate], @prompts_all[:recurcive] ]
       @defaults = @defaults + [ "Ignore", "No" ]
       @list = @list + [ "Ignore|Replace", "Yes|No" ]
       @inputbox = UI.inputbox(@prompts, @defaults, @list, @inputbox_window_name)
       input_labels = {}
-      @inputbox.count.times do |i|
+      @inputbox.each_index do |i|
         temp = { @prompts_all.key(@prompts[i]) => @inputbox[i] }
         input_labels = input_labels.merge(temp)
       end
       return input_labels
     end
 
-  end #class AddAttribute
+    def standart_attribute(attribute)
+      label_std = { name: "Name",
+                 summary: "Summary",
+             description: "Description",
+                itemcode: "ItemCode",
+                       x: "X",
+                       y: "Y",
+                       z: "Z",
+                    lenx: "LenX",
+                    leny: "LenY",
+                    lenz: "LenZ",
+                    rotx: "RotX",
+                    roty: "RotY",
+                    rotz: "RotZ",
+                material: "Material",
+               scaletool: "ScaleTool",
+                  hidden: "Hidden",
+                 onclick: "onClick",
+                  copies: "Copies",
+                imageurl: "ImageURL",
+             dialogwidth: "DialogWidth",
+            dialogheight: "DialogHeight" }
+      standart_attribute_status = []
+      key = attribute.to_s.downcase.to_sym
+      if label_std.has_key?(key)
+        standart_attribute_status[0] = true
+        standart_attribute_status[1] = label_std.fetch(key)
+       else
+        standart_attribute_status[0] = false
+        standart_attribute_status[1] = attribute.to_s
+      end
+      standart_attribute_status
+    end
 
+  end #class AddAttribute
 
   def self.get_definition(entity)
     if entity.is_a?(Sketchup::ComponentInstance)
@@ -341,27 +381,6 @@ module AddAttributes
   end
 
   def self.set_attributes(entity ,input)
-    label_std = { name: "Name",
-                summary: "Summary",
-            description: "Description",
-               itemcode: "ItemCode",
-                      x: "X",
-                      y: "Y",
-                      z: "Z",
-                   lenx: "LenX",
-                   leny: "LenY",
-                   lenz: "LenZ",
-                   rotx: "RotX",
-                   roty: "RotY",
-                   rotz: "RotZ",
-               material: "Material",
-              scaletool: "ScaleTool",
-                  hidden: "Hidden",
-                 onclick: "onClick",
-                  copies: "Copies",
-               imageurl: "ImageURL",
-            dialogwidth: "DialogWidth",
-            dialogheight: "DialogHeight" }
     attributes_formulaunits = { FLOAT: "Decimal Number",
                                STRING: "Text",
                                INCHES: "Inches",
@@ -387,14 +406,21 @@ module AddAttributes
                           VIEW: "User can see this attribute",
                        TEXTBOX: "User can edit as a textbox",
                           LIST: "User can select from a list" }
-    if label_std.has_value?(input[:label])
-      label_input =  label_std.key(input[:label]).to_s
+    standart_input = AddAttributeInputbox.new
+    is_a_standart_input = standart_input.standart_attribute(input[:label])
+    if is_a_standart_input[0]
+      label_input = input[:label].to_s.downcase
     else
-      label_input = input[:label]
+      label_input = input[:label].to_s
     end
-    entity.set_attribute "dynamic_attributes", "_#{label_input}_label", input[:label]
-    entity.set_attribute"dynamic_attributes", "_#{label_input}_access", attributes_access.key(input[:access]).to_s
-    if input[:label] == label_std[:scaletool]
+    entity.set_attribute "dynamic_attributes", "_#{label_input}_label", input[:label].to_s
+    entity.set_attribute "dynamic_attributes", "_#{label_input}_access", attributes_access.key(input[:access]).to_s
+    result_value = input[:value]
+    if result_value[0] == "="
+      result_value.slice!(0)
+      entity.set_attribute "dynamic_attributes", "_#{label_input}_formula", result_value
+    end
+    if input[:label] == "ScaleTool"
       scaletool_binary = ""
       input.each_value do |value|
         scaletool_binary = scaletool_binary + "0" if value == "Yes" && input.key(value) != :recurcive
@@ -403,30 +429,32 @@ module AddAttributes
       scaletool_dec = scaletool_binary.reverse.to_i(2)
       entity.set_attribute "dynamic_attributes", "scaletool", scaletool_dec
     end
-    if input.has_key?(:formlabel)
-      entity.set_attribute "dynamic_attributes", "_#{label_input}_formlabel", input[:formlabel]
+    if input.has_key?("formlabel".to_sym)
+      entity.set_attribute "dynamic_attributes", "_#{label_input}_formlabel", input[:formlabel].to_s
     end
-    if input.has_key?(:units)
+    if input.has_key?("units".to_sym)
       entity.set_attribute "dynamic_attributes", "_#{label_input}_units", attributes_units.key(input[:units]).to_s
       case input[:units].to_s
       when "Millimeters"
-        result_units = input[:value].to_f*(1.to_inch/1.to_mm)
+        result_value = input[:value].to_f*(1.to_inch/1.to_mm)
       when "Centimeters"
-        result_units = input[:value].to_f*(1.to_inch/1.to_cm)
+        result_value = input[:value].to_f*(1.to_inch/1.to_cm)
       when "Meters"
-        result_units = input[:value].to_f*(1.to_inch/1.to_m)
+        result_value = input[:value].to_f*(1.to_inch/1.to_m)
       else
-        result_units = input[:value]
+        result_value = input[:value]
       end
-      entity.set_attribute "dynamic_attributes", label_input, result_units
     end
-    if input.has_key?(:formulaunits)
+    entity.set_attribute "dynamic_attributes", label_input, result_value
+    if input.has_key?("formulaunits".to_sym)
       entity.set_attribute "dynamic_attributes", "_#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
     end
     if input[:options] != nil
-      entity.set_attribute "dynamic_attributes" , "_#{label_input}_options", input[:options]
+      entity.set_attribute "dynamic_attributes" , "_#{label_input}_options", input[:options].to_s
     end
-    entity.set_attribute "dynamic_attributes", "_lengthunits", input[:lengthunits]
+    if input.has_key?("lengthunits".to_sym)
+      entity.set_attribute "dynamic_attributes", "_lengthunits", input[:lengthunits].to_s
+    end
   end #set_attributes
 
   def self.recursive_set_attributes(selection, input)
@@ -452,15 +480,13 @@ module AddAttributes
       input = attribute_inputbox.inputbox(choice)
       status = model.start_operation('Adding attribute', true)
       recursive_status = input[:recurcive].to_s
-      puts input
-      puts input[:recurcive].to_s
       case recursive_status
       when "Yes"
         self.recursive_set_attributes(selection, input)
       when "No"
         selection.each { |entity| self.set_attributes(entity, input) }
       else
-        puts "Failure"
+        puts "Failure recursive"
         nil
       end
       model.commit_operation
