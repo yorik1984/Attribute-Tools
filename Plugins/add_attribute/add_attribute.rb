@@ -53,24 +53,21 @@ module AddAttributes
                    @prompts_all[:value],
                    @prompts_all[:formulaunits],
                    @prompts_all[:access],
-                   @prompts_all[:options],
-                   @prompts_all[:lengthunits] ]
+                   @prompts_all[:options] ]
       @defaults = ["",
                   "",
                   "End user's model units",
                   "",
                   "Text",
                   "User cannot see this attribute",
-                  "",
-                  "CENTIMETERS" ]
+                  "" ]
       @list = ["",
               "",
               "End user's model units|Whole Number|Decimal Number|Percentage|True/False|Text|Inches|Decimal Feet|Millimeters|Centimeters|Meters|Degrees|Dollars|Euros|Yen|Pounds (weight)|Kilograms",
               "",
               "Decimal Number|Text|Inches|Centimeters",
               "User cannot see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
-              "",
-              "INCHES|CENTIMETERS" ]
+              "" ]
       @inputbox_window_name = "Input attributes"
       @inputbox = []
     end
@@ -153,8 +150,11 @@ module AddAttributes
           choice = custom_is_standart[1]
         else
           @inputbox_window_name = "Input Custom attribute"
+          @prompts[7] = @prompts_all[:lengthunits]
           @defaults[0] = custom_name[0]
+          @defaults[7] = "CENTIMETERS"
           @list[0] = custom_name[0]
+          @list[7] = "INCHES|CENTIMETERS"
         end
       end
       case choice
@@ -175,12 +175,15 @@ module AddAttributes
         else
           @inputbox_window_name = "Input Size attribute " + choice
         end
+        @prompts[7] = @prompts_all[:lengthunits]
         @defaults[0] = choice
         @defaults[2] = "Millimeters"
         @defaults[4] = "Centimeters"
+        @defaults[7] = "CENTIMETERS"
         @list[0] = choice
         @list[2] = "End user's model units|Inches|Decimal Feet|Millimeters|Centimeters|Meters"
         @list[4] = "Inches|Centimeters"
+        @list[7] = "INCHES|CENTIMETERS"
       when "RotX", "RotY", "RotZ"
         @inputbox_window_name = "Input Rotation attribute " + choice
         @prompts = [ @prompts_all[:label],
@@ -302,8 +305,12 @@ module AddAttributes
         @list = [ choice,
                   "",
                   "User cannot see this attribute" ]
+      when "Toogle Units"
+        @prompts = [ @prompts_all[:lengthunits] ]
+        @defaults = [ "CENTIMETERS" ]
+        @list = [ "INCHES|CENTIMETERS" ]
       else
-        puts"Failure case choice"
+        puts "Custom choice"
       end # case choice
       @prompts = @prompts + [ @prompts_all[:duplicate], @prompts_all[:recurcive] ]
       @defaults = @defaults + [ "Ignore", "No" ]
@@ -380,7 +387,7 @@ module AddAttributes
     true
   end
 
-  def self.set_attributes(entity ,input)
+  def self.set_dynamic_attributes(entity ,input)
     attributes_formulaunits = { FLOAT: "Decimal Number",
                                STRING: "Text",
                                INCHES: "Inches",
@@ -413,12 +420,33 @@ module AddAttributes
     else
       label_input = input[:label].to_s
     end
-    entity.set_attribute "dynamic_attributes", "_#{label_input}_label", input[:label].to_s
-    entity.set_attribute "dynamic_attributes", "_#{label_input}_access", attributes_access.key(input[:access]).to_s
-    result_value = input[:value]
-    if result_value[0] == "="
-      result_value.slice!(0)
-      entity.set_attribute "dynamic_attributes", "_#{label_input}_formula", result_value
+    dict = "dynamic_attributes"
+    if input.has_key?("label".to_sym)
+      entity.set_attribute dict, "_#{label_input}_label", input[:label].to_s
+    end
+    if input.has_key?("access".to_sym)
+      entity.set_attribute dict, "_#{label_input}_access", attributes_access.key(input[:access]).to_s
+    end
+    if input.has_key?("value".to_sym)
+      result_value = input[:value]
+      if result_value[0] == "="
+        result_value.slice!(0)
+        entity.set_attribute dict, "_#{label_input}_formula", result_value
+      end
+      if input.has_key?("units".to_sym)
+        entity.set_attribute dict, "_#{label_input}_units", attributes_units.key(input[:units]).to_s
+        case input[:units].to_s
+        when "Millimeters"
+          result_value = input[:value].to_f*(1.to_inch/1.to_mm)
+        when "Centimeters"
+          result_value = input[:value].to_f*(1.to_inch/1.to_cm)
+        when "Meters"
+          result_value = input[:value].to_f*(1.to_inch/1.to_m)
+        else
+          result_value = input[:value]
+        end
+      end
+      entity.set_attribute dict, label_input, result_value
     end
     if input[:label] == "ScaleTool"
       scaletool_binary = ""
@@ -427,42 +455,33 @@ module AddAttributes
         scaletool_binary = scaletool_binary + "1" if value == "No" && input.key(value) != :recurcive
       end
       scaletool_dec = scaletool_binary.reverse.to_i(2)
-      entity.set_attribute "dynamic_attributes", "scaletool", scaletool_dec
+      entity.set_attribute dict, "scaletool", scaletool_dec
     end
     if input.has_key?("formlabel".to_sym)
-      entity.set_attribute "dynamic_attributes", "_#{label_input}_formlabel", input[:formlabel].to_s
+      entity.set_attribute dict, "_#{label_input}_formlabel", input[:formlabel].to_s
     end
-    if input.has_key?("units".to_sym)
-      entity.set_attribute "dynamic_attributes", "_#{label_input}_units", attributes_units.key(input[:units]).to_s
-      case input[:units].to_s
-      when "Millimeters"
-        result_value = input[:value].to_f*(1.to_inch/1.to_mm)
-      when "Centimeters"
-        result_value = input[:value].to_f*(1.to_inch/1.to_cm)
-      when "Meters"
-        result_value = input[:value].to_f*(1.to_inch/1.to_m)
-      else
-        result_value = input[:value]
-      end
-    end
-    entity.set_attribute "dynamic_attributes", label_input, result_value
     if input.has_key?("formulaunits".to_sym)
-      entity.set_attribute "dynamic_attributes", "_#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
+      entity.set_attribute dict, "_#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
     end
     if input[:options] != nil
-      entity.set_attribute "dynamic_attributes" , "_#{label_input}_options", input[:options].to_s
+      entity.set_attribute dict , "_#{label_input}_options", input[:options].to_s
     end
     if input.has_key?("lengthunits".to_sym)
-      entity.set_attribute "dynamic_attributes", "_lengthunits", input[:lengthunits].to_s
+      entity.set_attribute dict, "_lengthunits", input[:lengthunits].to_s
+      # definition set_attribute dict, "_lengthunits", input[:lengthunits].to_s
+    elsif entity.get_attribute(dict, "_lengthunits") == nil
+      entity.set_attribute dict, "_lengthunits", "INCHES"
+      # definition set_attribute dict, "_lengthunits", "INCHES"
     end
-  end #set_attributes
+  end #set_dynamic_attributes
 
-  def self.recursive_set_attributes(selection, input)
+  def self.recursive_set_dynamic_attributes(selection, input)
     selection.each do |entity|
       definition = self.get_definition(entity)
       next if definition.nil?
-      set_attributes(entity, input) if entity.is_a?(Sketchup::ComponentInstance)
-      self.recursive_set_attributes(definition.entities, input)
+      set_dynamic_attributes(entity, input) if entity.is_a?(Sketchup::ComponentInstance)
+      self.recursive_set_dynamic_attributes(definition.entities, input)
+      puts definition.entities
     end
   end
 
@@ -473,7 +492,7 @@ module AddAttributes
       input = []
       prompts = ["Attribute Name"]
       defaults = ["Custom..."]
-      list = ["Custom...|Name|Summary|Description|ItemCode|X|Y|Z|LenX|LenY|LenZ|RotX|RotY|RotZ|Material|ScaleTool|Hidden|onClick|Copies|ImageURL|DialogWidth|DialogHeight"]
+      list = ["Custom...|Name|Summary|Description|ItemCode|X|Y|Z|LenX|LenY|LenZ|RotX|RotY|RotZ|Material|ScaleTool|Hidden|onClick|Copies|ImageURL|DialogWidth|DialogHeight|Toogle Units"]
       choice_attributes = UI.inputbox(prompts, defaults, list, "Choice attributes")
       choice = choice_attributes[0].to_s
       attribute_inputbox = AddAttributeInputbox.new
@@ -482,9 +501,9 @@ module AddAttributes
       recursive_status = input[:recurcive].to_s
       case recursive_status
       when "Yes"
-        self.recursive_set_attributes(selection, input)
+        self.recursive_set_dynamic_attributes(selection, input)
       when "No"
-        selection.each { |entity| self.set_attributes(entity, input) }
+        selection.each { |entity| self.set_dynamic_attributes(entity, input) }
       else
         puts "Failure recursive"
         nil
