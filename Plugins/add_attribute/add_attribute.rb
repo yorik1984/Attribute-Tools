@@ -33,7 +33,7 @@ module AddAttributes
       @prompts_all = { label: "Name",
                    formlabel: "Display label",
                        units: "Display in",
-                       value: "Value",
+                       value: "Value or formula ( = )",
                 formulaunits: "Units",
                       access: "Display rule",
                      options: "List Option (Opt1=Val1&&Opt2=Val2)",
@@ -286,14 +286,17 @@ module AddAttributes
           @inputbox_window_name = "Input Form Design attribute " + choice
         end
         @prompts = [ @prompts_all[:label],
+                     @prompts_all[:formlabel],
                      @prompts_all[:value],
                      @prompts_all[:access] ]
         @defaults = [ choice,
+                      "Copies",
                       "",
                       "User cannot see this attribute" ]
         @list = [ choice,
-                  "",
-                  "User cannot see this attribute" ]
+                 "Copies",
+                 "",
+                 "User cannot see this attribute" ]
       when "DialogWidth", "DialogHeight"
         @inputbox_window_name = "Input Form Design attribute " + choice
         @prompts = [ @prompts_all[:label],
@@ -360,14 +363,14 @@ module AddAttributes
 
   end #class AddAttribute
 
-  def self.get_definition(entity)
-    if entity.is_a?(Sketchup::ComponentInstance)
-      entity.definition
-    elsif entity.is_a?(Sketchup::Group)
-      entity.entities.parent
-    else
-      nil
+  def self.include_element?(array, element)
+    array.each_index do |i|
+      if array[i] == element
+        return true
+        exit
+      end
     end
+    return false
   end
 
   def self.select_components_messagebox?(selection)
@@ -387,7 +390,28 @@ module AddAttributes
     true
   end
 
-  def self.set_dynamic_attributes(entity ,input)
+  def self.get_definition(entity)
+    if entity.is_a?(Sketchup::ComponentInstance)
+      entity.definition
+    elsif entity.is_a?(Sketchup::Group)
+      entity.entities.parent
+    else
+      nil
+    end
+  end
+
+  def self.recursive_set_dynamic_attributes(selection, input, recursive_status)
+    selection.each do |entity|
+      definition = self.get_definition(entity)
+      next if definition.nil?
+      self.set_dynamic_attributes(entity, input) if entity.is_a?(Sketchup::ComponentInstance)
+      if recursive_status == "Yes"
+        self.recursive_set_dynamic_attributes(definition.entities, input, recursive_status)
+      end
+    end
+  end
+
+  def self.set_dynamic_attributes(entity, input)
     attributes_formulaunits = { FLOAT: "Decimal Number",
                                STRING: "Text",
                                INCHES: "Inches",
@@ -414,27 +438,57 @@ module AddAttributes
                        TEXTBOX: "User can edit as a textbox",
                           LIST: "User can select from a list" }
     standart_input = AddAttributeInputbox.new
-    is_a_standart_input = standart_input.standart_attribute(input[:label])
-    if is_a_standart_input[0]
-      label_input = input[:label].to_s.downcase
-    else
-      label_input = input[:label].to_s
-    end
+    label_input = input[:label].to_s.downcase
     dict = "dynamic_attributes"
-    if input.has_key?("label".to_sym)
-      entity.set_attribute dict, "_#{label_input}_label", input[:label].to_s
+    instance_name = entity.name.to_s
+    definition_name = entity.definition.name.to_s
+    if !instance_name.empty?
+     entity.set_attribute dict, "_name", instance_name
+     entity.definition.set_attribute dict, "_name", instance_name
+    else
+     entity.set_attribute dict, "_name", definition_name
+     entity.definition.set_attribute dict, "_name", definition_name
     end
-    if input.has_key?("access".to_sym)
-      entity.set_attribute dict, "_#{label_input}_access", attributes_access.key(input[:access]).to_s
+    wide_label = ["X", "Y", "Z", "RotX", "RotY", "RotZ", "Copies"]
+    if input.has_key?("label".to_sym)
+      if self.include_element?(wide_label, input[:label].to_s)
+        entity.set_attribute dict, "#{label_input}", input[:label].to_s
+        entity.set_attribute dict, "_#{label_input}_label", input[:label].to_s
+        entity.definition.set_attribute dict, "_inst__#{label_input}_label", input[:label].to_s
+      else
+        entity.definition.set_attribute dict, "_#{label_input}_label", input[:label].to_s
+      end
+    end
+    without_access = ["Name", "Summary", "Description", "ItemCode", "Material", "ScaleTool", "Hidden", "onclick"]
+    if input.has_key?("access".to_sym) && !self.include_element?(without_access, input[:access].to_s)
+      if self.include_element?(wide_label, input[:access].to_s)
+        entity.set_attribute dict, "#{label_input}", attributes_access.key(input[:access]).to_s
+        entity.set_attribute dict, "_#{label_input}_access", attributes_access.key(input[:access]).to_s
+        entity.definition.set_attribute dict, "_inst__#{label_input}_access", attributes_access.key(input[:access]).to_s
+      else
+        entity.definition.set_attribute dict, "_#{label_input}_access", attributes_access.key(input[:access]).to_s
+      end
     end
     if input.has_key?("value".to_sym)
       result_value = input[:value]
       if result_value[0] == "="
-        result_value.slice!(0)
-        entity.set_attribute dict, "_#{label_input}_formula", result_value
+        value_formula = result_value[1..result_value.length]
+        if self.include_element?(wide_label, input[:label].to_s)
+          entity.set_attribute dict, "#{label_input}", value_formula
+          entity.set_attribute dict, "_#{label_input}_formula", value_formula
+          entity.definition.set_attribute dict, "_inst__#{label_input}_formula", value_formula
+        else
+          entity.definition.set_attribute dict, "_#{label_input}_formula", value_formula
+        end
       end
       if input.has_key?("units".to_sym)
-        entity.set_attribute dict, "_#{label_input}_units", attributes_units.key(input[:units]).to_s
+        if self.include_element?(wide_label, input[:units].to_s)
+          entity.set_attribute dict, "#{label_input}", attributes_units.key(input[:units]).to_s
+          entity.set_attribute dict, "_#{label_input}_units", attributes_units.key(input[:units]).to_s
+          entity.definition.set_attribute dict, "_inst__#{label_input}_units", attributes_units.key(input[:units]).to_s
+        else
+          entity.definition.set_attribute dict, "_#{label_input}_units", attributes_units.key(input[:units]).to_s
+        end
         case input[:units].to_s
         when "Millimeters"
           result_value = input[:value].to_f*(1.to_inch/1.to_mm)
@@ -446,7 +500,12 @@ module AddAttributes
           result_value = input[:value]
         end
       end
-      entity.set_attribute dict, label_input, result_value
+      if self.include_element?(wide_label, input[:label].to_s)
+        entity.set_attribute dict, label_input, result_value
+      else
+        entity.set_attribute dict, label_input, result_value
+        entity.definition.set_attribute dict, label_input, result_value
+      end
     end
     if input[:label] == "ScaleTool"
       scaletool_binary = ""
@@ -457,33 +516,42 @@ module AddAttributes
       scaletool_dec = scaletool_binary.reverse.to_i(2)
       entity.set_attribute dict, "scaletool", scaletool_dec
     end
+    wide_formlabel = ["X", "Y", "Z", "RotX", "RotY", "RotZ", "Copies"]
     if input.has_key?("formlabel".to_sym)
-      entity.set_attribute dict, "_#{label_input}_formlabel", input[:formlabel].to_s
+      if self.include_element?(wide_formlabel, input[:formlabel].to_s)
+        entity.set_attribute dict, "#{label_input}", input[:formlabel].to_s
+        entity.set_attribute dict, "_#{label_input}_formlabel", input[:formlabel].to_s
+        entity.definition.set_attribute dict, "_inst__#{label_input}_formlabel", input[:formlabel].to_s
+      else
+       entity.definition.set_attribute dict, "_#{label_input}_formlabel", input[:formlabel].to_s
+      end
     end
     if input.has_key?("formulaunits".to_sym)
-      entity.set_attribute dict, "_#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
+      if self.include_element?(wide_formlabel, input[:formulaunits].to_s)
+        entity.set_attribute dict, "#{label_input}", attributes_formulaunits.key(input[:formulaunits]).to_s
+        entity.set_attribute dict, "_#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
+        entity.definition.set_attribute dict, "_inst__#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
+      else
+       entity.definition.set_attribute dict, "_#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
+      end
     end
     if input[:options] != nil
       entity.set_attribute dict , "_#{label_input}_options", input[:options].to_s
     end
     if input.has_key?("lengthunits".to_sym)
       entity.set_attribute dict, "_lengthunits", input[:lengthunits].to_s
-      # definition set_attribute dict, "_lengthunits", input[:lengthunits].to_s
+      entity.definition.set_attribute dict, "_lengthunits", input[:lengthunits].to_s
     elsif entity.get_attribute(dict, "_lengthunits") == nil
       entity.set_attribute dict, "_lengthunits", "INCHES"
-      # definition set_attribute dict, "_lengthunits", "INCHES"
+      entity.definition.set_attribute dict, "_lengthunits", "INCHES"
     end
+
+    # REDRAW
+    # temporary ON
+    $dc_observers.get_latest_class.redraw_with_undo(entity)
+
   end #set_dynamic_attributes
 
-  def self.recursive_set_dynamic_attributes(selection, input)
-    selection.each do |entity|
-      definition = self.get_definition(entity)
-      next if definition.nil?
-      set_dynamic_attributes(entity, input) if entity.is_a?(Sketchup::ComponentInstance)
-      self.recursive_set_dynamic_attributes(definition.entities, input)
-      puts definition.entities
-    end
-  end
 
   def self.inputbox_attributes
     model = Sketchup.active_model
@@ -499,15 +567,7 @@ module AddAttributes
       input = attribute_inputbox.inputbox(choice)
       status = model.start_operation('Adding attribute', true)
       recursive_status = input[:recurcive].to_s
-      case recursive_status
-      when "Yes"
-        self.recursive_set_dynamic_attributes(selection, input)
-      when "No"
-        selection.each { |entity| self.set_dynamic_attributes(entity, input) }
-      else
-        puts "Failure recursive"
-        nil
-      end
+      self.recursive_set_dynamic_attributes(selection, input, recursive_status)
       model.commit_operation
     else
       nil
