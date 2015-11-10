@@ -78,7 +78,7 @@ module AddAttributes
       status_error = { NO_ERROR: "Input attribute name correct",
                     EMPTY_FIELD: "Attribute name cannot be empty",
                  CONTAIN_SPACES: "Attribute name cannot contain spaces",
-           NOT_LETTER_OR_NUMBER: "Attribute name can only contain letters and numbers",
+           NOT_LETTER_OR_NUMBER: "Attribute name can only contain Latin letters and numbers",
                      UNDERSCOPE: "Attribute name cannot begin with an underscore",
                 NUMBER_IN_BEGIN: "Attribute name cannot begin with an number",
                        CYRILLIC: "Attribute name cannot contain Cyrillic symbols",
@@ -98,7 +98,8 @@ module AddAttributes
       end
       special = "?<>',./[]=-)(*&^%$#`~{}\""
       regex_special = /[#{special.gsub(/./){|char| "\\#{char}"}}]/
-      if input =~ regex_special
+      regex_latin = /\p{Latin}/
+      if input =~ regex_special || input.to_s !=~ regex_latin
         valid_status[0] = false
         valid_status[1] = status_error[:NOT_LETTER_OR_NUMBER]
         return valid_status
@@ -114,13 +115,6 @@ module AddAttributes
       if input[0].to_s=~ regex_digits
         valid_status[0] = false
         valid_status[1] = status_error[:NUMBER_IN_BEGIN]
-        return valid_status
-        nil
-      end
-      regex_cyrillic = /\p{Cyrillic}/
-      if input.to_s=~ regex_cyrillic
-        valid_status[0] = false
-        valid_status[1] = status_error[:CYRILLIC]
         return valid_status
         nil
       end
