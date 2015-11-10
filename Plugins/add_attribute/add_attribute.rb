@@ -14,7 +14,7 @@
 # 1.0 Initial release
 # by Igor Sepelev aka goga63
 #
-# 1.1 16-October-2015
+# 1.1-beta 10-November-2015
 # by Yurij Kulchevich
 #  - add english version of dialogs;
 #  - add toolbar icon;
@@ -81,15 +81,14 @@ module AddAttributes
            NOT_LETTER_OR_NUMBER: "Attribute name can only contain letters and numbers",
                      UNDERSCOPE: "Attribute name cannot begin with an underscore",
                 NUMBER_IN_BEGIN: "Attribute name cannot begin with an number",
+                       CYRILLIC: "Attribute name cannot contain Cyrillic symbols",
                   TRUE_OR_FALSE: "You may not name an attribute TRUE or FALSE" }
-
       if input.to_s == ""
         valid_status[0] = false
         valid_status[1] = status_error[:EMPTY_FIELD]
         return valid_status
         nil
       end
-
       regex_space = /(\s)/
       if input =~ regex_space
         valid_status[0] = false
@@ -97,7 +96,6 @@ module AddAttributes
         return valid_status
         nil
       end
-
       special = "?<>',./[]=-)(*&^%$#`~{}\""
       regex_special = /[#{special.gsub(/./){|char| "\\#{char}"}}]/
       if input =~ regex_special
@@ -106,14 +104,12 @@ module AddAttributes
         return valid_status
         nil
       end
-
        if input[0].to_s == "_"
         valid_status[0] = false
         valid_status[1] = status_error[:UNDERSCOPE]
         return valid_status
         nil
       end
-
       regex_digits = /(\d)/
       if input[0].to_s=~ regex_digits
         valid_status[0] = false
@@ -121,14 +117,19 @@ module AddAttributes
         return valid_status
         nil
       end
-
+      regex_cyrillic = /\p{Cyrillic}/
+      if input.to_s=~ regex_cyrillic
+        valid_status[0] = false
+        valid_status[1] = status_error[:CYRILLIC]
+        return valid_status
+        nil
+      end
       if input.downcase == "true" || input.downcase == "false"
         valid_status[0] = false
         valid_status[1] = status_error[:TRUE_OR_FALSE]
         return valid_status
         nil
       end
-
       valid_status[0] = true
       valid_status[1] = status_error[:NO_ERROR]
       return valid_status
@@ -319,6 +320,7 @@ module AddAttributes
       @defaults = @defaults + [ "Ignore", "No" ]
       @list = @list + [ "Ignore|Replace", "Yes|No" ]
       @inputbox = UI.inputbox(@prompts, @defaults, @list, @inputbox_window_name)
+      @inputbox[0] = @inputbox[0]
       input_labels = {}
       @inputbox.each_index do |i|
         temp = { @prompts_all.key(@prompts[i]) => @inputbox[i] }
@@ -400,13 +402,18 @@ module AddAttributes
     end
   end
 
-  def self.recursive_set_dynamic_attributes(selection, input, recursive_status)
+  def self.recursive_set_dynamic_attributes(selection, input, duplicate_status, recursive_status)
+    dict = "dynamic_attributes"
     selection.each do |entity|
       definition = self.get_definition(entity)
       next if definition.nil?
-      self.set_dynamic_attributes(entity, input) if entity.is_a?(Sketchup::ComponentInstance)
+      instance_attribute = entity.get_attribute dict, input[:label].to_s.downcase
+      definition_attribute = entity.definition.get_attribute dict, input[:label].to_s.downcase
+      if (duplicate_status == "Replace") || (duplicate_status == "Ignore" && (instance_attribute == nil || definition_attribute == nil))
+       self.set_dynamic_attributes(entity, input) if entity.is_a?(Sketchup::ComponentInstance)
+      end
       if recursive_status == "Yes"
-        self.recursive_set_dynamic_attributes(definition.entities, input, recursive_status)
+        self.recursive_set_dynamic_attributes(definition.entities, input, duplicate_status, recursive_status)
       end
     end
   end
@@ -450,6 +457,8 @@ module AddAttributes
      entity.definition.set_attribute dict, "_name", definition_name
     end
     wide_label = ["X", "Y", "Z", "RotX", "RotY", "RotZ", "Copies"]
+    without_access = ["Name", "Summary", "Description", "ItemCode", "Material", "ScaleTool", "Hidden", "onclick"]
+    wide_formlabel = ["X", "Y", "Z", "RotX", "RotY", "RotZ", "Copies"]
     if input.has_key?("label".to_sym)
       if self.include_element?(wide_label, input[:label].to_s)
         entity.set_attribute dict, "#{label_input}", input[:label].to_s
@@ -459,7 +468,6 @@ module AddAttributes
         entity.definition.set_attribute dict, "_#{label_input}_label", input[:label].to_s
       end
     end
-    without_access = ["Name", "Summary", "Description", "ItemCode", "Material", "ScaleTool", "Hidden", "onclick"]
     if input.has_key?("access".to_sym) && !self.include_element?(without_access, input[:access].to_s)
       if self.include_element?(wide_label, input[:access].to_s)
         entity.set_attribute dict, "#{label_input}", attributes_access.key(input[:access]).to_s
@@ -515,8 +523,8 @@ module AddAttributes
       end
       scaletool_dec = scaletool_binary.reverse.to_i(2)
       entity.set_attribute dict, "scaletool", scaletool_dec
+      entity.definition.set_attribute dict, "scaletool", scaletool_dec
     end
-    wide_formlabel = ["X", "Y", "Z", "RotX", "RotY", "RotZ", "Copies"]
     if input.has_key?("formlabel".to_sym)
       if self.include_element?(wide_formlabel, input[:formlabel].to_s)
         entity.set_attribute dict, "#{label_input}", input[:formlabel].to_s
@@ -567,7 +575,8 @@ module AddAttributes
       input = attribute_inputbox.inputbox(choice)
       status = model.start_operation('Adding attribute', true)
       recursive_status = input[:recurcive].to_s
-      self.recursive_set_dynamic_attributes(selection, input, recursive_status)
+      duplicate_status = input[:duplicate].to_s
+      self.recursive_set_dynamic_attributes(selection, input, duplicate_status, recursive_status)
       model.commit_operation
     else
       nil
