@@ -99,7 +99,7 @@ module AddAttributes
       special = "?<>',./[]=-)(*&^%$#`~{}\""
       regex_special = /[#{special.gsub(/./){|char| "\\#{char}"}}]/
       regex_latin = /\p{Latin}/
-      if input =~ regex_special || input.to_s !=~ regex_latin
+      if input =~ regex_special || !(input.to_s =~ regex_latin)
         valid_status[0] = false
         valid_status[1] = status_error[:NOT_LETTER_OR_NUMBER]
         return valid_status
