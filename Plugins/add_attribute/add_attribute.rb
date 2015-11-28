@@ -16,9 +16,15 @@
 #
 # 1.1-beta 10-November-2015
 # by Yurij Kulchevich
-#  - add english version of dialogs;
-#  - add toolbar icon;
-#  - validate input.
+#  - add english version of dialogs
+#  - add toolbar icon
+#  - validate input
+# 1.2 -beta release 28-November-2015
+#  - change icon size
+#  - some bugfix
+#  TODO
+#  - add component nesting levels
+#  - add Help content
 # ------------------------------------------------------------------------------
 
 require 'sketchup.rb'
@@ -36,10 +42,11 @@ module AddAttributes
                        value: "Value or formula ( = )",
                 formulaunits: "Units",
                       access: "Display rule",
-                     options: "List Option (Opt1=Val1&&Opt2=Val2)",
+                     options: "List Option (&&Opt1=Val1&&Opt2=Val2&&)",
                  lengthunits: "Toggle Units",
                    duplicate: "Duplicate attribute name",
                    recurcive: "Recursive adding attribute(s)",
+             recurcive_level: "Component nesting levels",
                      scale_x: "Scale along red. (X)",
                      scale_y: "Scale along green. (Y)",
                      scale_z: "Scale along blue. (Z)",
@@ -69,11 +76,12 @@ module AddAttributes
               "User cannot see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
               "" ]
       @inputbox_window_name = "Input attributes"
+      @recurcive_level_list = "All"
       @inputbox = []
     end
 
     def valid_attribute_name(input)
-      #Inspect attribute name
+      # Inspect attribute name
       valid_status = []
       status_error = { NO_ERROR: "Input attribute name correct",
                     EMPTY_FIELD: "Attribute name cannot be empty",
@@ -254,7 +262,7 @@ module AddAttributes
                      @prompts_all[:value],
                      @prompts_all[:access] ]
         @defaults = [ choice,
-                      "FALSE",
+                      "0",
                       "User cannot see this attribute" ]
         @list = [ choice,
                   "",
@@ -281,15 +289,12 @@ module AddAttributes
           @inputbox_window_name = "Input Form Design attribute " + choice
         end
         @prompts = [ @prompts_all[:label],
-                     @prompts_all[:formlabel],
                      @prompts_all[:value],
                      @prompts_all[:access] ]
         @defaults = [ choice,
-                      "Copies",
                       "",
                       "User cannot see this attribute" ]
         @list = [ choice,
-                 "Copies",
                  "",
                  "User cannot see this attribute" ]
       when "DialogWidth", "DialogHeight"
@@ -308,11 +313,11 @@ module AddAttributes
         @defaults = [ "CENTIMETERS" ]
         @list = [ "INCHES|CENTIMETERS" ]
       else
-        puts "Custom choice"
+        nil
       end # case choice
-      @prompts = @prompts + [ @prompts_all[:duplicate], @prompts_all[:recurcive] ]
-      @defaults = @defaults + [ "Ignore", "No" ]
-      @list = @list + [ "Ignore|Replace", "Yes|No" ]
+      @prompts = @prompts + [ @prompts_all[:duplicate], @prompts_all[:recurcive], @prompts_all[:recurcive_level] ]
+      @defaults = @defaults + [ "Ignore", "No", "All" ]
+      @list = @list + [ "Ignore|Replace", "Yes|No", @recurcive_level_list]
       @inputbox = UI.inputbox(@prompts, @defaults, @list, @inputbox_window_name)
       @inputbox[0] = @inputbox[0]
       input_labels = {}
@@ -357,7 +362,7 @@ module AddAttributes
       standart_attribute_status
     end
 
-  end #class AddAttribute
+  end # class AddAttribute
 
   def self.include_element?(array, element)
     array.each_index do |i|
@@ -451,7 +456,7 @@ module AddAttributes
      entity.definition.set_attribute dict, "_name", definition_name
     end
     wide_label = ["X", "Y", "Z", "RotX", "RotY", "RotZ", "Copies"]
-    without_access = ["Name", "Summary", "Description", "ItemCode", "Material", "ScaleTool", "Hidden", "onclick"]
+    without_access = ["Name", "Summary", "Description", "ItemCode", "Material", "ScaleTool", "Hidden", "onClick", "Copies","DialogWidth", "DialogHeight"]
     wide_formlabel = ["X", "Y", "Z", "RotX", "RotY", "RotZ", "Copies"]
     if input.has_key?("label".to_sym)
       if self.include_element?(wide_label, input[:label].to_s)
@@ -462,8 +467,8 @@ module AddAttributes
         entity.definition.set_attribute dict, "_#{label_input}_label", input[:label].to_s
       end
     end
-    if input.has_key?("access".to_sym) && !self.include_element?(without_access, input[:access].to_s)
-      if self.include_element?(wide_label, input[:access].to_s)
+    if input.has_key?("access".to_sym) && !self.include_element?(without_access, input[:label].to_s)
+      if self.include_element?(wide_label, input[:label].to_s)
         entity.set_attribute dict, "#{label_input}", attributes_access.key(input[:access]).to_s
         entity.set_attribute dict, "_#{label_input}_access", attributes_access.key(input[:access]).to_s
         entity.definition.set_attribute dict, "_inst__#{label_input}_access", attributes_access.key(input[:access]).to_s
@@ -484,7 +489,7 @@ module AddAttributes
         end
       end
       if input.has_key?("units".to_sym)
-        if self.include_element?(wide_label, input[:units].to_s)
+        if self.include_element?(wide_label, input[:label].to_s)
           entity.set_attribute dict, "#{label_input}", attributes_units.key(input[:units]).to_s
           entity.set_attribute dict, "_#{label_input}_units", attributes_units.key(input[:units]).to_s
           entity.definition.set_attribute dict, "_inst__#{label_input}_units", attributes_units.key(input[:units]).to_s
@@ -509,18 +514,8 @@ module AddAttributes
         entity.definition.set_attribute dict, label_input, result_value
       end
     end
-    if input[:label] == "ScaleTool"
-      scaletool_binary = ""
-      input.each_value do |value|
-        scaletool_binary = scaletool_binary + "0" if value == "Yes" && input.key(value) != :recurcive
-        scaletool_binary = scaletool_binary + "1" if value == "No" && input.key(value) != :recurcive
-      end
-      scaletool_dec = scaletool_binary.reverse.to_i(2)
-      entity.set_attribute dict, "scaletool", scaletool_dec
-      entity.definition.set_attribute dict, "scaletool", scaletool_dec
-    end
     if input.has_key?("formlabel".to_sym)
-      if self.include_element?(wide_formlabel, input[:formlabel].to_s)
+      if self.include_element?(wide_formlabel, input[:label].to_s)
         entity.set_attribute dict, "#{label_input}", input[:formlabel].to_s
         entity.set_attribute dict, "_#{label_input}_formlabel", input[:formlabel].to_s
         entity.definition.set_attribute dict, "_inst__#{label_input}_formlabel", input[:formlabel].to_s
@@ -529,7 +524,7 @@ module AddAttributes
       end
     end
     if input.has_key?("formulaunits".to_sym)
-      if self.include_element?(wide_formlabel, input[:formulaunits].to_s)
+      if self.include_element?(wide_formlabel, input[:label].to_s)
         entity.set_attribute dict, "#{label_input}", attributes_formulaunits.key(input[:formulaunits]).to_s
         entity.set_attribute dict, "_#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
         entity.definition.set_attribute dict, "_inst__#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
@@ -537,7 +532,7 @@ module AddAttributes
        entity.definition.set_attribute dict, "_#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
       end
     end
-    if input[:options] != nil
+    if input[:options].to_s.length != 0
       entity.set_attribute dict , "_#{label_input}_options", input[:options].to_s
     end
     if input.has_key?("lengthunits".to_sym)
@@ -548,11 +543,40 @@ module AddAttributes
       entity.definition.set_attribute dict, "_lengthunits", "INCHES"
     end
 
+    case input[:label].to_s
+    when "ScaleTool"
+      scaletool_binary = ""
+      input.each_value do |value|
+        scaletool_binary = scaletool_binary + "0" if value == "Yes"
+        scaletool_binary = scaletool_binary + "1" if value == "No"
+      end
+      scaletool_binary.slice!(7)
+      scaletool_dec = scaletool_binary.reverse.to_i(2).to_s
+      entity.set_attribute dict, "scaletool", scaletool_dec
+      entity.definition.set_attribute dict, "scaletool", scaletool_dec
+      entity.definition.set_attribute dict, "_scaletool_label", "ScaleTool"
+      entity.definition.set_attribute dict, "_scaletool_formlabel", "ScaleTool"
+      entity.definition.set_attribute dict, "_scaletool_units", "STRING"
+    when "Hidden"
+      entity.definition.set_attribute dict, "_hidden_formlabel", "Hidden"
+      entity.definition.set_attribute dict, "_hidden_units", "BOOLEAN"
+    when "onClick"
+      entity.definition.set_attribute dict, "_onclick_units", "STRING"
+    when "Copies"
+      entity.set_attribute dict, "_copies_formlabel", "Copies"
+      entity.set_attribute dict, "_copies_units", "INTEGER"
+      entity.definition.set_attribute dict, "_inst__copies_units", "INTEGER"
+    when "DialogWidth", "DialogHeight"
+      entity.definition.set_attribute dict, "_#{label_input}_formlabel", input[:label].to_s
+      entity.definition.set_attribute dict, "_#{label_input}_units", "INTEGER"
+    else
+      nil
+    end
+
     # REDRAW
-    # temporary ON
     $dc_observers.get_latest_class.redraw_with_undo(entity)
 
-  end #set_dynamic_attributes
+  end # set_dynamic_attributes
 
 
   def self.inputbox_attributes
@@ -568,8 +592,8 @@ module AddAttributes
       attribute_inputbox = AddAttributeInputbox.new
       input = attribute_inputbox.inputbox(choice)
       status = model.start_operation('Adding attribute', true)
-      recursive_status = input[:recurcive].to_s
       duplicate_status = input[:duplicate].to_s
+      recursive_status = input[:recurcive].to_s
       self.recursive_set_dynamic_attributes(selection, input, duplicate_status, recursive_status)
       model.commit_operation
     else
@@ -583,8 +607,8 @@ end # module AddAttributes
 unless file_loaded?(__FILE__)
   # Create toolbar
   add_attribute_tb = UI::Toolbar.new(AddAttributes::PLUGIN_NAME)
-  icon_s_inputbox_attributes = File.join(AddAttributes::PATH_ICONS, "inputbox_attributes_16.png")
-  icon_inputbox_attributes = File.join(AddAttributes::PATH_ICONS, "inputbox_attributes_24.png")
+  icon_s_inputbox_attributes = File.join(AddAttributes::PATH_ICONS, "inputbox_attributes_24.png")
+  icon_inputbox_attributes = File.join(AddAttributes::PATH_ICONS, "inputbox_attributes_36.png")
 
   # Add item "inputbox_attributes"
   inputbox_attributes_cmd = UI::Command.new("Adding new attribute from inputbox"){ AddAttributes::inputbox_attributes }
