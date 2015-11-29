@@ -1,0 +1,49 @@
+body {
+	height: 100%;
+	margin: 0px;
+	min-height: 100%;
+	padding: 0px;
+	background: lightgray;
+}
+p { margin: 20px; }
+h1{ padding: 20px}
+h2 {margin: 10px;}
+h3 {margin: 10px;}
+
+#layout-wrapper {
+	background-color: white;
+	height: auto !important;
+	height: 100%;
+	margin: auto;
+	min-height: 100%;
+	width: 1024px;
+	outline: 1px solid #000;
+}
+
+#site-header
+{
+	background: #bdbdbd;
+	outline: 1px solid #000;
+}
+
+#footer-cleaner {
+	clear: both;
+	height: 25px;
+}
+#site-footer {
+	background: violet;
+	bottom: 0;
+	height: 25px;
+	line-height: 25px;
+	margin: -25px auto auto auto;
+	width: 1024px;
+	outline: 1px solid #000;
+}
+
+.copyleft {
+	float: left;
+}
+
+.site-developer {
+	float: right;
+}

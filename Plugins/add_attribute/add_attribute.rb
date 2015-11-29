@@ -1,4 +1,5 @@
 # Copyright 2014, Igor Sepelev aka goga63
+# Copyright 2015, Yurij Kulchevich aka yorik1984
 # All Rights Reserved
 # THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES,
 # INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
@@ -7,24 +8,23 @@
 # License: GPL V.3
 # Author: Igor Sepelev aka goga63
 # Name: add_attribute.rb
-# Version: 1.1
+# Version: 1.2
 # Description: Plugin add attributes of components in model
-# Usage: see README
+# Usage: see in menu Help in Extension >  Add attribute > Help
 # History:
-# 1.0 Initial release
+# 1.0 Initial release 21-July-2014
 # by Igor Sepelev aka goga63
-#
 # 1.1-beta 10-November-2015
-# by Yurij Kulchevich
+# by Yurij Kulchevich aka yorik1984
 #  - add english version of dialogs
 #  - add toolbar icon
 #  - validate input
 # 1.2 -beta release 28-November-2015
 #  - change icon size
 #  - some bugfix
-#  TODO
 #  - add component nesting levels
 #  - add Help content
+# 1.2  30-November-2015 - First public version
 # ------------------------------------------------------------------------------
 
 require 'sketchup.rb'
@@ -33,7 +33,7 @@ module AddAttributes
 
   class AddAttributeInputbox
 
-    attr_accessor :prompts, :defaults, :list, :inputbox_window_name
+    attr_accessor :prompts, :defaults, :list, :inputbox_window_name, :recursive_level, :recursive_level_list
 
     def initialize
       @prompts_all = { label: "Name",
@@ -45,8 +45,7 @@ module AddAttributes
                      options: "List Option (&&Opt1=Val1&&Opt2=Val2&&)",
                  lengthunits: "Toggle Units",
                    duplicate: "Duplicate attribute name",
-                   recurcive: "Recursive adding attribute(s)",
-             recurcive_level: "Component nesting levels",
+                   recursive: "Component nesting levels (biggest = All)",
                      scale_x: "Scale along red. (X)",
                      scale_y: "Scale along green. (Y)",
                      scale_z: "Scale along blue. (Z)",
@@ -66,17 +65,18 @@ module AddAttributes
                   "End user's model units",
                   "",
                   "Text",
-                  "User cannot see this attribute",
+                  "User can't see this attribute",
                   "" ]
       @list = ["",
               "",
               "End user's model units|Whole Number|Decimal Number|Percentage|True/False|Text|Inches|Decimal Feet|Millimeters|Centimeters|Meters|Degrees|Dollars|Euros|Yen|Pounds (weight)|Kilograms",
               "",
               "Decimal Number|Text|Inches|Centimeters",
-              "User cannot see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
+              "User can't see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
               "" ]
       @inputbox_window_name = "Input attributes"
-      @recurcive_level_list = "All"
+      @recursive_level_list = "2"
+      @recursive_level = 1
       @inputbox = []
     end
 
@@ -84,12 +84,11 @@ module AddAttributes
       # Inspect attribute name
       valid_status = []
       status_error = { NO_ERROR: "Input attribute name correct",
-                    EMPTY_FIELD: "Attribute name cannot be empty",
-                 CONTAIN_SPACES: "Attribute name cannot contain spaces",
+                    EMPTY_FIELD: "Attribute name can't be empty",
+                 CONTAIN_SPACES: "Attribute name can't contain spaces",
            NOT_LETTER_OR_NUMBER: "Attribute name can only contain Latin letters and numbers",
-                     UNDERSCOPE: "Attribute name cannot begin with an underscore",
-                NUMBER_IN_BEGIN: "Attribute name cannot begin with an number",
-                       CYRILLIC: "Attribute name cannot contain Cyrillic symbols",
+                     UNDERSCOPE: "Attribute name can't begin with an underscore",
+                NUMBER_IN_BEGIN: "Attribute name can't begin with an number",
                   TRUE_OR_FALSE: "You may not name an attribute TRUE or FALSE" }
       if input.to_s == ""
         valid_status[0] = false
@@ -136,8 +135,17 @@ module AddAttributes
       valid_status[1] = status_error[:NO_ERROR]
       return valid_status
     end # valid_attribute_name
+    def recursive_level_search(selection, level)
+      selection.each do |entity|
+        definition = AddAttributes::get_definition(entity)
+        next if definition.nil?
+        recursive_level_search(definition.entities, level+1) + 1
+      end
+      @recursive_level = level if level > @recursive_level
+      return 1
+    end
 
-    def inputbox(choice)
+    def inputbox(choice, selection)
       if choice == "Custom..."
         input_check = []
         input_check[0] = false
@@ -199,13 +207,13 @@ module AddAttributes
                       "",
                       "Degrees",
                       "",
-                      "User cannot see this attribute",
+                      "User can't see this attribute",
                       "" ]
         @list = [ choice,
                   "",
                   "Degrees",
                   "",
-                  "User cannot see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
+                  "User can't see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
                   "" ]
       when "Material"
         @inputbox_window_name = "Input Behaviors attribute " + choice
@@ -219,13 +227,13 @@ module AddAttributes
                       "",
                       "Text",
                       "",
-                      "User cannot see this attribute",
+                      "User can't see this attribute",
                       "" ]
         @list = [ choice,
                   "",
                   "Text",
                   "",
-                  "User cannot see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
+                  "User can't see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
                   "" ]
       when "ScaleTool"
         @inputbox_window_name = "Input Behaviors attribute " + choice
@@ -239,7 +247,7 @@ module AddAttributes
                      @prompts_all[:scale_x_y],
                      @prompts_all[:scale_x_y_z] ]
         @defaults = [ choice,
-                      "User cannot see this attribute",
+                      "User can't see this attribute",
                       "Yes",
                       "Yes",
                       "Yes",
@@ -248,7 +256,7 @@ module AddAttributes
                       "Yes",
                       "Yes" ]
         @list = [ choice,
-                  "User cannot see this attribute",
+                  "User can't see this attribute",
                   "Yes|No",
                   "Yes|No",
                   "Yes|No",
@@ -263,10 +271,10 @@ module AddAttributes
                      @prompts_all[:access] ]
         @defaults = [ choice,
                       "0",
-                      "User cannot see this attribute" ]
+                      "User can't see this attribute" ]
         @list = [ choice,
                   "",
-                  "User cannot see this attribute" ]
+                  "User can't see this attribute" ]
       when "onClick"
         @inputbox_window_name = "Input Behaviors attribute " + choice
         @prompts_all[:formlabel] = "Tool tip"
@@ -277,11 +285,11 @@ module AddAttributes
         @defaults = [ choice,
                       "Click to activate",
                       "",
-                      "User cannot see this attribute" ]
+                      "User can't see this attribute" ]
         @list = [ choice,
                   "",
                   "",
-                  "User cannot see this attribute" ]
+                  "User can't see this attribute" ]
       when "Copies", "ImageURL"
         if choice == "Copies"
           @inputbox_window_name = "Input Behaviors attribute " + choice
@@ -293,10 +301,10 @@ module AddAttributes
                      @prompts_all[:access] ]
         @defaults = [ choice,
                       "",
-                      "User cannot see this attribute" ]
+                      "User can't see this attribute" ]
         @list = [ choice,
                  "",
-                 "User cannot see this attribute" ]
+                 "User can't see this attribute" ]
       when "DialogWidth", "DialogHeight"
         @inputbox_window_name = "Input Form Design attribute " + choice
         @prompts = [ @prompts_all[:label],
@@ -304,10 +312,10 @@ module AddAttributes
                      @prompts_all[:access] ]
         @defaults = [ choice,
                       "400",
-                      "User cannot see this attribute" ]
+                      "User can't see this attribute" ]
         @list = [ choice,
                   "",
-                  "User cannot see this attribute" ]
+                  "User can't see this attribute" ]
       when "Toogle Units"
         @prompts = [ @prompts_all[:lengthunits] ]
         @defaults = [ "CENTIMETERS" ]
@@ -315,9 +323,15 @@ module AddAttributes
       else
         nil
       end # case choice
-      @prompts = @prompts + [ @prompts_all[:duplicate], @prompts_all[:recurcive], @prompts_all[:recurcive_level] ]
-      @defaults = @defaults + [ "Ignore", "No", "All" ]
-      @list = @list + [ "Ignore|Replace", "Yes|No", @recurcive_level_list]
+      recursive_level_search(selection, @recursive_level)
+      if @recursive_level > 2
+        for i in 3..@recursive_level
+          @recursive_level_list += "|#{i}"
+        end
+      end
+      @prompts = @prompts + [ @prompts_all[:duplicate], @prompts_all[:recursive] ]
+      @defaults = @defaults + [ "Ignore", "2" ]
+      @list = @list + [ "Ignore|Replace|Equal replace", @recursive_level_list]
       @inputbox = UI.inputbox(@prompts, @defaults, @list, @inputbox_window_name)
       @inputbox[0] = @inputbox[0]
       input_labels = {}
@@ -401,19 +415,20 @@ module AddAttributes
     end
   end
 
-  def self.recursive_set_dynamic_attributes(selection, input, duplicate_status, recursive_status)
+  def self.recursive_set_dynamic_attributes(selection, input, duplicate_status, current_nested_level, recursive_level)
     dict = "dynamic_attributes"
     selection.each do |entity|
       definition = self.get_definition(entity)
       next if definition.nil?
       instance_attribute = entity.get_attribute dict, input[:label].to_s.downcase
       definition_attribute = entity.definition.get_attribute dict, input[:label].to_s.downcase
-      if (duplicate_status == "Replace") || (duplicate_status == "Ignore" && (instance_attribute == nil || definition_attribute == nil))
-       self.set_dynamic_attributes(entity, input) if entity.is_a?(Sketchup::ComponentInstance)
+      if (duplicate_status == "Replace") ||
+         (duplicate_status == "Ignore" && (instance_attribute == nil || definition_attribute == nil)) ||
+         (duplicate_status == "Equal replace" && (instance_attribute != nil || definition_attribute != nil)) &&
+         (current_nested_level <= recursive_level)
+        self.set_dynamic_attributes(entity, input) if entity.is_a?(Sketchup::ComponentInstance)
       end
-      if recursive_status == "Yes"
-        self.recursive_set_dynamic_attributes(definition.entities, input, duplicate_status, recursive_status)
-      end
+      self.recursive_set_dynamic_attributes(definition.entities, input, duplicate_status, current_nested_level+1, recursive_level)
     end
   end
 
@@ -439,7 +454,7 @@ module AddAttributes
                              YEN: "Yen",
                           POUNDS: "Pounds (weight)",
                        KILOGRAMS: "Kilograms" }
-    attributes_access = { NONE: "User cannot see this attribute",
+    attributes_access = { NONE: "User can't see this attribute",
                           VIEW: "User can see this attribute",
                        TEXTBOX: "User can edit as a textbox",
                           LIST: "User can select from a list" }
@@ -550,7 +565,6 @@ module AddAttributes
         scaletool_binary = scaletool_binary + "0" if value == "Yes"
         scaletool_binary = scaletool_binary + "1" if value == "No"
       end
-      scaletool_binary.slice!(7)
       scaletool_dec = scaletool_binary.reverse.to_i(2).to_s
       entity.set_attribute dict, "scaletool", scaletool_dec
       entity.definition.set_attribute dict, "scaletool", scaletool_dec
@@ -578,8 +592,8 @@ module AddAttributes
 
   end # set_dynamic_attributes
 
-
   def self.inputbox_attributes
+    start_nested_level = 2
     model = Sketchup.active_model
     selection = model.selection
     if select_components_messagebox?(selection)
@@ -590,16 +604,28 @@ module AddAttributes
       choice_attributes = UI.inputbox(prompts, defaults, list, "Choice attributes")
       choice = choice_attributes[0].to_s
       attribute_inputbox = AddAttributeInputbox.new
-      input = attribute_inputbox.inputbox(choice)
+      input = attribute_inputbox.inputbox(choice, selection)
       status = model.start_operation('Adding attribute', true)
       duplicate_status = input[:duplicate].to_s
-      recursive_status = input[:recurcive].to_s
-      self.recursive_set_dynamic_attributes(selection, input, duplicate_status, recursive_status)
+      recursive_level = input[:recursive].to_i
+      self.recursive_set_dynamic_attributes(selection, input, duplicate_status, start_nested_level, recursive_level)
       model.commit_operation
     else
       nil
     end
   end # inputbox_attributes
+
+  def self.help_information
+    # open help content in browser
+    plugins = Sketchup.find_support_file "Plugins/"
+    help_file_folder = "add_attribute/help/"
+    help_file = File.join(plugins, help_file_folder, "help.html" )
+    if (help_file)
+      UI.openURL "file://" + help_file
+    else
+      UI.messagebox "Failure"
+    end
+  end
 
 end # module AddAttributes
 
@@ -622,5 +648,6 @@ unless file_loaded?(__FILE__)
   # Create menu
   add_attribute = UI.menu("Plugins").add_submenu(AddAttributes::PLUGIN_NAME)
   add_attribute.add_item("Add attributes inputbox"){ AddAttributes::inputbox_attributes }
+  add_attribute.add_item("Help") {AddAttributes::help_information}
   file_loaded(__FILE__)
 end

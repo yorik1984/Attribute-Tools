@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Add attribute</title>
+		<link rel="stylesheet" href="help_style.css">
+	<body>
+		<div id="layout-wrapper">
+		<header id="site-header">
+		<p></p>
+		<h1 align="center">Плагин для Sketchup 2014 Pro или выше "Add attribute"</h1>
+		<p></p>
+		</header>
+		<article id="site-content">
+		<h2>Описание</h2>
+		<p>Плагин для Sketchup 2014 Pro или выше для задания динамических атрибутов выделенным компонентам в модели включая компоненты во всех уровнях вложенности</p>
+		<p>Список функций:</p>
+		<ul>
+		<li>Добавление стандартных атрибутов</li>
+		<li>Добавление собственных атрибутов</li>
+		<li>Работает только из компонентами</li>
+		<li>Динамическое изменение выбора уровня вложенности компонентов в зависимости от выбранного</li>
+		</ul>
+		<h2>Использование</h2>
+		<p>Использовать можно как через панель инструментов</p>
+		<p class="fig"><img src="img/toolbar.jpg"  align="top"></p>
+		<p>или главное меню программы</p>
+		<p><em>Extension > Add attribute </em></p>
+		<ol>
+		<li><strong>Add attributes inputbox</strong> - Включает диалоговое окно с выпадающим списком для выбора атрибута, который необходимо добавить.</li>
+		<li><strong>Help</strong> (Справка) - Открытие файла справки (этой страницы).</li>
+		</ol>
+		<p>Для работы плагина нужно выбрать компоненты. Если ничего не будет выбрано, то появится предупреждение:</p>
+		<p class="fig"><img src="img/select_nothing.jpg"  align="top"></p>
+		<p>При выборе не только компонентов также появится предупреждение о необходимости выбора <b>только</b> компонентов.</p>
+		<p class="fig"><img src="img/select_only_components.jpg"  align="top"></p>
+		<p>Если выбор сделан правильно, то появится диалоговое окно, где можно выбрать атрибут для задания ему значений. Это может быть собственный (<em>Custom...</em>), выбор из списка стандартных и возможность переключение единиц измерения в компонентах при задании атрибутов (<em>Toogle Units</em>).</p>
+		<p class="fig"><img src="img/choice_attributes.jpg" align="top"></p>
+		<p>При задании собственного атрибута (<em>Custom...</em>), появится дополнительное окна для ввода имени.</p>
+		<p class="fig"><img src="img/custom_attribute_name.jpg" align="top"></p>
+		<p>Имя атрибута имеет ряд ограничений. При вводе неправильного формата имени будет выдано предупреждение с пояснением допущенной ошибки при вводе. Например, ошибка имени атрибута, при которой оно начинается цифрой.</p>
+		<p class="fig"><img src="img/failure_number.jpg" align="top"></p>
+		<p>Ниже представлен список всех ошибок ввода имени с пояснениями в скобках.</p>
+		<ul>
+		<li><b>Attribute name can't be empty</b> (Не должно быть "пустым", тоесть не содержащим ни одного символа)</li>
+		<li><b>Attribute name can't contain spaces</b> (Не должно содержать пробелов)</li>
+		<li><b>Attribute name can only contain Latin letters and numbers</b> (Состоять только из символов Латинского алфавита и цифр)</li>
+		<li><b>Attribute name can't begin with an underscore</b> (Не должно начинаться символом подчеркивания)</li>
+		<li><b>Attribute name can't begin with an number</b> (Не должно начинаться с цифры)</li>
+		<li><b>You may not name an attribute TRUE or FALSE</b> (Не должно совпадать со словами TRUE или FALSE)</li>
+		</ul>
+		<p>Если введенное имя совпадает со стандартным атрибутом, то задание значений атрибутов будет как у стандартного с этим именем. Ниже показано соответствие полей ввода плагина и встроенного в Sketchup (<em>Window > Component Attributes</em>) инструмента задания атрибутов на примере собственного атрибута. Для стандартных атрибутов диалоговое окна будет содержать другие поля ввода в зависимости от атрибутов.</p>
+		<p class="fig"><img src="img/input_custom_attribute_compare.jpg" align="top"></p>
+		<h2>Установка</h2>
+		<p>Плагин работает только в Sketchup 2014 Pro или выше. Установите новую версию программы перед использованием плагина.
+		<a href="http://help.sketchup.com/en/article/38583">Installing Ruby Plugins in SketchUp</a></p>
+		<div id="footer-cleaner">
+		</div>
+		</div>
+		<footer id="site-footer">
+			<div class="copyleft">(&#596) 2015 Yurij Kulchevich</div>
+			<div class="site-developer">Source code on <a href="https://github.com/yorik1984/Add_attribute" target="_blank">github</a></div>
+		</footer>
+
+	</body>
+</html>
