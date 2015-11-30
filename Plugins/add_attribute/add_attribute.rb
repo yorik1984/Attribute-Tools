@@ -46,6 +46,7 @@ module AddAttributes
                  lengthunits: "Toggle Units",
                    duplicate: "Duplicate attribute name",
                    recursive: "Component nesting levels (biggest = All)",
+                      report: "Report",
                      scale_x: "Scale along red. (X)",
                      scale_y: "Scale along green. (Y)",
                      scale_z: "Scale along blue. (Z)",
@@ -329,9 +330,9 @@ module AddAttributes
           @recursive_level_list += "|#{i}"
         end
       end
-      @prompts = @prompts + [ @prompts_all[:duplicate], @prompts_all[:recursive] ]
-      @defaults = @defaults + [ "Ignore", "2" ]
-      @list = @list + [ "Ignore|Replace|Equal replace", @recursive_level_list]
+      @prompts = @prompts + [ @prompts_all[:duplicate], @prompts_all[:recursive], @prompts_all[:report] ]
+      @defaults = @defaults + [ "Ignore", "2", "Off"]
+      @list = @list + [ "Ignore|Replace|Equal replace", @recursive_level_list, "Off|Short in messagebox|Full in console"]
       @inputbox = UI.inputbox(@prompts, @defaults, @list, @inputbox_window_name)
       @inputbox[0] = @inputbox[0]
       input_labels = {}
@@ -415,21 +416,42 @@ module AddAttributes
     end
   end
 
-  def self.recursive_set_dynamic_attributes(selection, input, duplicate_status, current_nested_level, recursive_level)
+  def self.recursive_set_dynamic_attributes(selection, input, duplicate_status, recursive_level, current_nested_level = 2, listing_components = [])
     dict = "dynamic_attributes"
     selection.each do |entity|
       definition = self.get_definition(entity)
       next if definition.nil?
       instance_attribute = entity.get_attribute dict, input[:label].to_s.downcase
       definition_attribute = entity.definition.get_attribute dict, input[:label].to_s.downcase
-      if (duplicate_status == "Replace") ||
-         (duplicate_status == "Ignore" && (instance_attribute == nil || definition_attribute == nil)) ||
-         (duplicate_status == "Equal replace" && (instance_attribute != nil || definition_attribute != nil)) &&
-         (current_nested_level <= recursive_level)
-        self.set_dynamic_attributes(entity, input) if entity.is_a?(Sketchup::ComponentInstance)
+      if current_nested_level <= recursive_level
+        if entity.is_a?(Sketchup::ComponentInstance)
+          separator = "  "
+          if current_nested_level > 2
+            for i in 3..current_nested_level do
+              separator += "| "
+            end
+          end
+          case duplicate_status
+            when "Replace"
+                self.set_dynamic_attributes(entity, input)
+                listing_components += ["#{current_nested_level}#{separator}#{entity.definition.name}"]
+            when "Ignore"
+              if instance_attribute == nil || definition_attribute == nil
+                self.set_dynamic_attributes(entity, input)
+                listing_components += ["#{current_nested_level}#{separator}#{entity.definition.name}"]
+              end
+            when "Equal replace"
+              if instance_attribute != nil || definition_attribute != nil
+                self.set_dynamic_attributes(entity, input)
+                listing_components += ["#{current_nested_level}#{separator}#{entity.definition.name}"]
+              end
+            else nil
+          end
+        end
       end
-      self.recursive_set_dynamic_attributes(definition.entities, input, duplicate_status, current_nested_level+1, recursive_level)
+    listing_components = self.recursive_set_dynamic_attributes(definition.entities, input, duplicate_status,recursive_level, current_nested_level + 1, listing_components)
     end
+    listing_components
   end
 
   def self.set_dynamic_attributes(entity, input)
@@ -593,7 +615,6 @@ module AddAttributes
   end # set_dynamic_attributes
 
   def self.inputbox_attributes
-    start_nested_level = 2
     model = Sketchup.active_model
     selection = model.selection
     if select_components_messagebox?(selection)
@@ -608,7 +629,21 @@ module AddAttributes
       status = model.start_operation('Adding attribute', true)
       duplicate_status = input[:duplicate].to_s
       recursive_level = input[:recursive].to_i
-      self.recursive_set_dynamic_attributes(selection, input, duplicate_status, start_nested_level, recursive_level)
+      report = input[:report].to_s
+      total_count = self.recursive_set_dynamic_attributes(selection, input, duplicate_status, recursive_level)
+      case report
+      when "Short in messagebox"
+        UI.messagebox("Attribute \" #{input[:label].to_s}\" has been added to #{total_count.length} component(s)")
+      when "Full in console"
+        puts "========================================"
+        puts "Attribute \"#{input[:label].to_s}\""
+        puts "----------------------------------------"
+        puts "#{total_count.length} component(s)"
+        puts "========================================"
+        puts total_count
+        puts "========================================"
+      else nil
+    end
       model.commit_operation
     else
       nil
