@@ -4,15 +4,18 @@ Add_attribute
 **_Changelog_**
 
 21-July-2014     - *version 1.0 - Initial release*
+
 10-November-2015 - *version 1.1-beta*
  - add english version of dialogs
  - add toolbar icon
  - validate input
+
 28-November-2015 - *version 1.2 -beta release*
  - change icon size
  - some bugfix
  - add component nesting levels
  - add Help content
+ 
 30-November-2015 - *version 1.2 - First public version*
 
 Description
