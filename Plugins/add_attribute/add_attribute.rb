@@ -55,25 +55,25 @@ module AddAttributes
                    scale_x_y: "Scale in red/green plane. (X+Y)",
                  scale_x_y_z: "Scale uniform (from corners). (XYZ)" }
       @prompts = [ @prompts_all[:label],
+                   @prompts_all[:formulaunits],
+                   @prompts_all[:access],
                    @prompts_all[:formlabel],
                    @prompts_all[:units],
                    @prompts_all[:value],
-                   @prompts_all[:formulaunits],
-                   @prompts_all[:access],
                    @prompts_all[:options] ]
       @defaults = ["",
+                  "Text",
+                  "User can't see this attribute",
                   "",
                   "End user's model units",
                   "",
-                  "Text",
-                  "User can't see this attribute",
                   "" ]
       @list = ["",
+              "Decimal Number|Text|Inches|Centimeters",
+              "User can't see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
               "",
               "End user's model units|Whole Number|Decimal Number|Percentage|True/False|Text|Inches|Decimal Feet|Millimeters|Centimeters|Meters|Degrees|Dollars|Euros|Yen|Pounds (weight)|Kilograms",
               "",
-              "Decimal Number|Text|Inches|Centimeters",
-              "User can't see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
               "" ]
       @inputbox_window_name = "Input attributes"
       @recursive_level_list = "2"
@@ -173,14 +173,14 @@ module AddAttributes
       when "Name", "Summary", "Description", "ItemCode"
         @inputbox_window_name = "Input Component Info attribute " + choice
         @prompts = [ @prompts_all[:label],
-                     @prompts_all[:value],
-                     @prompts_all[:access] ]
+                     @prompts_all[:access],
+                     @prompts_all[:value] ]
         @defaults = [ choice,
-                      "",
-                      "User can see this attribute" ]
+                      "User can see this attribute" ,
+                      "" ]
         @list = [ choice,
-                  "",
-                  "User can see this attribute" ]
+                  "User can see this attribute",
+                  ""]
       when "X","Y","Z","LenX","LenY", "LenZ"
         if choice == "X" || choice == "Y" || choice == "Z"
           @inputbox_window_name = "Input Position attribute " + choice
@@ -189,52 +189,52 @@ module AddAttributes
         end
         @prompts[7] = @prompts_all[:lengthunits]
         @defaults[0] = choice
-        @defaults[2] = "Millimeters"
-        @defaults[4] = "Centimeters"
+        @defaults[1] = "Centimeters"
+        @defaults[4] = "Millimeters"
         @defaults[7] = "CENTIMETERS"
         @list[0] = choice
-        @list[2] = "End user's model units|Inches|Decimal Feet|Millimeters|Centimeters|Meters"
-        @list[4] = "Inches|Centimeters"
+        @list[1] = "Inches|Centimeters"
+        @list[4] = "End user's model units|Inches|Decimal Feet|Millimeters|Centimeters|Meters"
         @list[7] = "INCHES|CENTIMETERS"
       when "RotX", "RotY", "RotZ"
         @inputbox_window_name = "Input Rotation attribute " + choice
         @prompts = [ @prompts_all[:label],
+                     @prompts_all[:access],
                      @prompts_all[:formlabel],
                      @prompts_all[:units],
                      @prompts_all[:value],
-                     @prompts_all[:access],
                      @prompts_all[:options] ]
         @defaults = [ choice,
+                      "User can't see this attribute",
                       "",
                       "Degrees",
                       "",
-                      "User can't see this attribute",
                       "" ]
         @list = [ choice,
+                  "User can't see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
                   "",
                   "Degrees",
                   "",
-                  "User can't see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
                   "" ]
       when "Material"
         @inputbox_window_name = "Input Behaviors attribute " + choice
         @prompts = [ @prompts_all[:label],
+                     @prompts_all[:access],
                      @prompts_all[:formlabel],
                      @prompts_all[:units],
                      @prompts_all[:value],
-                     @prompts_all[:access],
                      @prompts_all[:options] ]
         @defaults = [ choice,
+                      "User can't see this attribute",
                       "",
                       "Text",
                       "",
-                      "User can't see this attribute",
                       "" ]
         @list = [ choice,
+                  "User can't see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
                   "",
                   "Text",
                   "",
-                  "User can't see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
                   "" ]
       when "ScaleTool"
         @inputbox_window_name = "Input Behaviors attribute " + choice
@@ -268,29 +268,29 @@ module AddAttributes
       when "Hidden"
         @inputbox_window_name = "Input Behaviors attribute " + choice
         @prompts = [ @prompts_all[:label],
-                     @prompts_all[:value],
-                     @prompts_all[:access] ]
+                     @prompts_all[:access],
+                     @prompts_all[:value] ]
         @defaults = [ choice,
-                      "0",
-                      "User can't see this attribute" ]
+                      "User can't see this attribute",
+                      "0"]
         @list = [ choice,
-                  "",
-                  "User can't see this attribute" ]
+                  "User can't see this attribute",
+                  "" ]
       when "onClick"
         @inputbox_window_name = "Input Behaviors attribute " + choice
         @prompts_all[:formlabel] = "Tool tip"
         @prompts = [ @prompts_all[:label],
+                     @prompts_all[:access],
                      @prompts_all[:formlabel],
-                     @prompts_all[:value],
-                     @prompts_all[:access] ]
+                     @prompts_all[:value] ]
         @defaults = [ choice,
+                      "User can't see this attribute",
                       "Click to activate",
-                      "",
-                      "User can't see this attribute" ]
+                      "" ]
         @list = [ choice,
+                  "User can't see this attribute",
                   "",
-                  "",
-                  "User can't see this attribute" ]
+                  "" ]
       when "Copies", "ImageURL"
         if choice == "Copies"
           @inputbox_window_name = "Input Behaviors attribute " + choice
@@ -298,25 +298,25 @@ module AddAttributes
           @inputbox_window_name = "Input Form Design attribute " + choice
         end
         @prompts = [ @prompts_all[:label],
-                     @prompts_all[:value],
-                     @prompts_all[:access] ]
+                     @prompts_all[:access],
+                     @prompts_all[:value] ]
         @defaults = [ choice,
-                      "",
-                      "User can't see this attribute" ]
+                      "User can't see this attribute",
+                      "" ]
         @list = [ choice,
-                 "",
-                 "User can't see this attribute" ]
+                 "User can't see this attribute",
+                 "" ]
       when "DialogWidth", "DialogHeight"
         @inputbox_window_name = "Input Form Design attribute " + choice
         @prompts = [ @prompts_all[:label],
-                     @prompts_all[:value],
-                     @prompts_all[:access] ]
+                     @prompts_all[:access],
+                     @prompts_all[:value] ]
         @defaults = [ choice,
-                      "400",
-                      "User can't see this attribute" ]
+                      "User can't see this attribute",
+                      "400" ]
         @list = [ choice,
-                  "",
-                  "User can't see this attribute" ]
+                  "User can't see this attribute",
+                  "" ]
       when "Toogle Units"
         @prompts = [ @prompts_all[:lengthunits] ]
         @defaults = [ "CENTIMETERS" ]
@@ -331,8 +331,8 @@ module AddAttributes
         end
       end
       @prompts = @prompts + [ @prompts_all[:duplicate], @prompts_all[:recursive], @prompts_all[:report] ]
-      @defaults = @defaults + [ "Ignore", "2", "Off"]
-      @list = @list + [ "Ignore|Replace|Equal replace", @recursive_level_list, "Off|Short in messagebox|Full in console"]
+      @defaults = @defaults + [ "Ignore", "2", "Off" ]
+      @list = @list + [ "Ignore|Replace|Equal replace", @recursive_level_list, "Off|Short in messagebox|Full in console" ]
       @inputbox = UI.inputbox(@prompts, @defaults, @list, @inputbox_window_name)
       @inputbox[0] = @inputbox[0]
       input_labels = {}
