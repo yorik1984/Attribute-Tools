@@ -15,7 +15,7 @@ Add_attribute
  - some bugfix
  - add component nesting levels
  - add Help content
- 
+
 30-November-2015 - *version 1.2 - First public version*
 
 Description
@@ -48,4 +48,5 @@ Plugin works only in Sketchup 2014 Pro or above. Update SketchUp before install.
 Authors
 -----------
 *Igor Sepelev aka [goga63](https://www.youtube.com/channel/UCYHOlAYFzT2R55uH7KDFIaQ/about)* - creator of 1-st version
+
 *Yurij Kulchevich aka [yorik1984](https://www.youtube.com/channel/UCwqnESLXeCXkN8KEoIkMoyA/about)* - author of improved features
