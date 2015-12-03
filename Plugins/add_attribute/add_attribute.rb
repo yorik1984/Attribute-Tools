@@ -62,19 +62,19 @@ module AddAttributes
                    @prompts_all[:value],
                    @prompts_all[:options] ]
       @defaults = ["",
-                  "Text",
-                  "User can't see this attribute",
-                  "",
-                  "End user's model units",
-                  "",
-                  "" ]
+                   "Text",
+                   "User can't see this attribute",
+                   "",
+                   "End user's model units",
+                   "",
+                   "" ]
       @list = ["",
-              "Decimal Number|Text|Inches|Centimeters",
-              "User can't see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
-              "",
-              "End user's model units|Whole Number|Decimal Number|Percentage|True/False|Text|Inches|Decimal Feet|Millimeters|Centimeters|Meters|Degrees|Dollars|Euros|Yen|Pounds (weight)|Kilograms",
-              "",
-              "" ]
+               "Decimal Number|Text|Inches|Centimeters",
+               "User can't see this attribute|User can see this attribute|User can edit as a textbox|User can select from a list",
+               "",
+               "End user's model units|Whole Number|Decimal Number|Percentage|True/False|Text|Inches|Decimal Feet|Millimeters|Centimeters|Meters|Degrees|Dollars|Euros|Yen|Pounds (weight)|Kilograms",
+               "",
+               "" ]
       @inputbox_window_name = "Input attributes"
       @recursive_level_list = "2"
       @recursive_level = 1
@@ -95,14 +95,12 @@ module AddAttributes
         valid_status[0] = false
         valid_status[1] = status_error[:EMPTY_FIELD]
         return valid_status
-        nil
       end
       regex_space = /(\s)/
       if input =~ regex_space
         valid_status[0] = false
         valid_status[1] = status_error[:CONTAIN_SPACES]
         return valid_status
-        nil
       end
       special = "?<>',./[]=-)(*&^%$#`~{}\""
       regex_special = /[#{special.gsub(/./){|char| "\\#{char}"}}]/
@@ -111,31 +109,28 @@ module AddAttributes
         valid_status[0] = false
         valid_status[1] = status_error[:NOT_LETTER_OR_NUMBER]
         return valid_status
-        nil
       end
-       if input[0].to_s == "_"
+      if input[0].to_s == "_"
         valid_status[0] = false
         valid_status[1] = status_error[:UNDERSCOPE]
         return valid_status
-        nil
       end
       regex_digits = /(\d)/
       if input[0].to_s=~ regex_digits
         valid_status[0] = false
         valid_status[1] = status_error[:NUMBER_IN_BEGIN]
         return valid_status
-        nil
       end
       if input.downcase == "true" || input.downcase == "false"
         valid_status[0] = false
         valid_status[1] = status_error[:TRUE_OR_FALSE]
         return valid_status
-        nil
       end
       valid_status[0] = true
       valid_status[1] = status_error[:NO_ERROR]
       return valid_status
     end # valid_attribute_name
+
     def recursive_level_search(selection, level)
       selection.each do |entity|
         definition = AddAttributes::get_definition(entity)
@@ -180,7 +175,7 @@ module AddAttributes
                       "" ]
         @list = [ choice,
                   "User can see this attribute",
-                  ""]
+                  "" ]
       when "X","Y","Z","LenX","LenY", "LenZ"
         if choice == "X" || choice == "Y" || choice == "Z"
           @inputbox_window_name = "Input Position attribute " + choice
@@ -304,8 +299,8 @@ module AddAttributes
                       "User can't see this attribute",
                       "" ]
         @list = [ choice,
-                 "User can't see this attribute",
-                 "" ]
+                  "User can't see this attribute",
+                  "" ]
       when "DialogWidth", "DialogHeight"
         @inputbox_window_name = "Input Form Design attribute " + choice
         @prompts = [ @prompts_all[:label],
@@ -336,8 +331,8 @@ module AddAttributes
       @inputbox = UI.inputbox(@prompts, @defaults, @list, @inputbox_window_name)
       @inputbox[0] = @inputbox[0]
       input_labels = {}
-      @inputbox.each_index do |i|
-        temp = { @prompts_all.key(@prompts[i]) => @inputbox[i] }
+      @inputbox.each_index do |index|
+        temp = { @prompts_all.key(@prompts[index]) => @inputbox[index] }
         input_labels = input_labels.merge(temp)
       end
       return input_labels
@@ -370,7 +365,7 @@ module AddAttributes
       if label_std.has_key?(key)
         standart_attribute_status[0] = true
         standart_attribute_status[1] = label_std.fetch(key)
-       else
+      else
         standart_attribute_status[0] = false
         standart_attribute_status[1] = attribute.to_s
       end
@@ -380,10 +375,9 @@ module AddAttributes
   end # class AddAttribute
 
   def self.include_element?(array, element)
-    array.each_index do |i|
-      if array[i] == element
+    array.each_index do |index|
+      if array[index] == element
         return true
-        exit
       end
     end
     return false
@@ -395,13 +389,11 @@ module AddAttributes
         if !entity.is_a?(Sketchup::ComponentInstance)
           UI.messagebox("Select only components")
           return false
-          nil
         end
       end
     else
       UI.messagebox("Select nothing")
       return false
-      nil
     end
     true
   end
@@ -427,32 +419,34 @@ module AddAttributes
         if entity.is_a?(Sketchup::ComponentInstance)
           separator = "  "
           if current_nested_level > 2
-            for i in 3..current_nested_level do
+            for i in 3..current_nested_level
               separator += "| "
             end
           end
+          level = current_nested_level.to_s + separator
           case duplicate_status
-            when "Replace"
-                self.set_dynamic_attributes(entity, input)
-                listing_components += ["#{current_nested_level}#{separator}#{entity.definition.name}"]
-            when "Ignore"
-              if instance_attribute == nil || definition_attribute == nil
-                self.set_dynamic_attributes(entity, input)
-                listing_components += ["#{current_nested_level}#{separator}#{entity.definition.name}"]
-              end
-            when "Equal replace"
-              if instance_attribute != nil || definition_attribute != nil
-                self.set_dynamic_attributes(entity, input)
-                listing_components += ["#{current_nested_level}#{separator}#{entity.definition.name}"]
-              end
-            else nil
+          when "Replace"
+            self.set_dynamic_attributes(entity, input)
+            listing_components += ["#{level[0,3]}#{separator}#{entity.definition.name}"]
+          when "Ignore"
+            if instance_attribute == nil || definition_attribute == nil
+              self.set_dynamic_attributes(entity, input)
+              listing_components += ["#{level[0,3]}#{separator}#{entity.definition.name}"]
+            end
+          when "Equal replace"
+            if instance_attribute != nil || definition_attribute != nil
+              self.set_dynamic_attributes(entity, input)
+              listing_components += ["#{level[0,3]}#{separator}#{entity.definition.name}"]
+            end
+          else
+            nil
           end
         end
       end
-    listing_components = self.recursive_set_dynamic_attributes(definition.entities, input, duplicate_status,recursive_level, current_nested_level + 1, listing_components)
+      listing_components = self.recursive_set_dynamic_attributes(definition.entities, input, duplicate_status,recursive_level, current_nested_level + 1, listing_components)
     end
     listing_components
-  end
+  end # recursive_set_dynamic_attributes
 
   def self.set_dynamic_attributes(entity, input)
     attributes_formulaunits = { FLOAT: "Decimal Number",
@@ -480,104 +474,125 @@ module AddAttributes
                           VIEW: "User can see this attribute",
                        TEXTBOX: "User can edit as a textbox",
                           LIST: "User can select from a list" }
-    standart_input = AddAttributeInputbox.new
     label_input = input[:label].to_s.downcase
     dict = "dynamic_attributes"
     instance_name = entity.name.to_s
     definition_name = entity.definition.name.to_s
+
     if !instance_name.empty?
-     entity.set_attribute dict, "_name", instance_name
-     entity.definition.set_attribute dict, "_name", instance_name
+      entity.set_attribute dict, "_name", instance_name
+      entity.definition.set_attribute dict, "_name", instance_name
     else
-     entity.set_attribute dict, "_name", definition_name
-     entity.definition.set_attribute dict, "_name", definition_name
+      entity.set_attribute dict, "_name", definition_name
+      entity.definition.set_attribute dict, "_name", definition_name
     end
+
     wide_label = ["X", "Y", "Z", "RotX", "RotY", "RotZ", "Copies"]
     without_access = ["Name", "Summary", "Description", "ItemCode", "Material", "ScaleTool", "Hidden", "onClick", "Copies","DialogWidth", "DialogHeight"]
     wide_formlabel = ["X", "Y", "Z", "RotX", "RotY", "RotZ", "Copies"]
+    result_value = input[:value]
+    value_zero = result_value[0].to_s
+    value_formula = result_value[1..result_value.length].to_s
+    standart = AddAttributeInputbox.new
+    input_is_standart = standart.standart_attribute(input[:label].to_s)
+
     if input.has_key?("label".to_sym)
       if self.include_element?(wide_label, input[:label].to_s)
-        entity.set_attribute dict, "#{label_input}", input[:label].to_s
         entity.set_attribute dict, "_#{label_input}_label", input[:label].to_s
         entity.definition.set_attribute dict, "_inst__#{label_input}_label", input[:label].to_s
       else
         entity.definition.set_attribute dict, "_#{label_input}_label", input[:label].to_s
       end
     end
+
     if input.has_key?("access".to_sym) && !self.include_element?(without_access, input[:label].to_s)
       if self.include_element?(wide_label, input[:label].to_s)
-        entity.set_attribute dict, "#{label_input}", attributes_access.key(input[:access]).to_s
         entity.set_attribute dict, "_#{label_input}_access", attributes_access.key(input[:access]).to_s
         entity.definition.set_attribute dict, "_inst__#{label_input}_access", attributes_access.key(input[:access]).to_s
       else
         entity.definition.set_attribute dict, "_#{label_input}_access", attributes_access.key(input[:access]).to_s
       end
     end
+
     if input.has_key?("value".to_sym)
-      result_value = input[:value]
-      if result_value[0] == "="
-        value_formula = result_value[1..result_value.length]
+      if input[:units].to_s.length != 0 && !self.include_element?(without_access, input[:label].to_s)
         if self.include_element?(wide_label, input[:label].to_s)
-          entity.set_attribute dict, "#{label_input}", value_formula
-          entity.set_attribute dict, "_#{label_input}_formula", value_formula
-          entity.definition.set_attribute dict, "_inst__#{label_input}_formula", value_formula
-        else
-          entity.definition.set_attribute dict, "_#{label_input}_formula", value_formula
-        end
-      end
-      if input.has_key?("units".to_sym)
-        if self.include_element?(wide_label, input[:label].to_s)
-          entity.set_attribute dict, "#{label_input}", attributes_units.key(input[:units]).to_s
           entity.set_attribute dict, "_#{label_input}_units", attributes_units.key(input[:units]).to_s
           entity.definition.set_attribute dict, "_inst__#{label_input}_units", attributes_units.key(input[:units]).to_s
         else
           entity.definition.set_attribute dict, "_#{label_input}_units", attributes_units.key(input[:units]).to_s
         end
-        case input[:units].to_s
-        when "Millimeters"
-          result_value = input[:value].to_f*(1.to_inch/1.to_mm)
-        when "Centimeters"
-          result_value = input[:value].to_f*(1.to_inch/1.to_cm)
-        when "Meters"
-          result_value = input[:value].to_f*(1.to_inch/1.to_m)
-        else
-          result_value = input[:value]
-        end
-      end
-      if self.include_element?(wide_label, input[:label].to_s)
-        entity.set_attribute dict, label_input, result_value
-      else
-        entity.set_attribute dict, label_input, result_value
-        entity.definition.set_attribute dict, label_input, result_value
       end
     end
-    if input.has_key?("formlabel".to_sym)
+
+
+    if input[:formlabel].to_s.length != 0
       if self.include_element?(wide_formlabel, input[:label].to_s)
-        entity.set_attribute dict, "#{label_input}", input[:formlabel].to_s
         entity.set_attribute dict, "_#{label_input}_formlabel", input[:formlabel].to_s
         entity.definition.set_attribute dict, "_inst__#{label_input}_formlabel", input[:formlabel].to_s
-      else
-       entity.definition.set_attribute dict, "_#{label_input}_formlabel", input[:formlabel].to_s
+      elsif !self.include_element?(without_access, input[:label].to_s)
+        entity.definition.set_attribute dict, "_#{label_input}_formlabel", input[:formlabel].to_s
       end
     end
-    if input.has_key?("formulaunits".to_sym)
+
+    if input[:formulaunits].to_s.length != 0
+      case input[:formulaunits].to_s
+      when "Inches"
+        result_value = input[:value].to_f*1.to_inch
+      when "Centimeters"
+        result_value = input[:value].to_f*(1.to_inch/1.to_cm)
+      else
+        result_value = input[:value]
+      end
       if self.include_element?(wide_formlabel, input[:label].to_s)
-        entity.set_attribute dict, "#{label_input}", attributes_formulaunits.key(input[:formulaunits]).to_s
         entity.set_attribute dict, "_#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
-        entity.definition.set_attribute dict, "_inst__#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
       else
-       entity.definition.set_attribute dict, "_#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
+        entity.definition.set_attribute dict, "_#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
       end
     end
+
     if input[:options].to_s.length != 0
       entity.set_attribute dict , "_#{label_input}_options", input[:options].to_s
     end
+
     if input.has_key?("lengthunits".to_sym)
       entity.set_attribute dict, "_lengthunits", input[:lengthunits].to_s
       entity.definition.set_attribute dict, "_lengthunits", input[:lengthunits].to_s
     elsif entity.get_attribute(dict, "_lengthunits") == nil
       entity.set_attribute dict, "_lengthunits", "INCHES"
       entity.definition.set_attribute dict, "_lengthunits", "INCHES"
+    end
+
+    if value_zero == "="
+      if self.include_element?(wide_label, input[:label].to_s)
+        entity.set_attribute dict, "_#{label_input}_formula", value_formula
+        entity.definition.set_attribute dict, "_inst__#{label_input}_formula", value_formula
+        entity.definition.set_attribute dict, "_inst_#{label_input}", result_value.to_f
+        entity.set_attribute dict, label_input, result_value.to_f
+      else
+        entity.definition.set_attribute dict, "_#{label_input}_formula", value_formula
+        entity.set_attribute dict, label_input, result_value.to_f
+        entity.definition.set_attribute dict, label_input, result_value.to_f
+      end
+    else
+      if self.include_element?(wide_label, input[:label].to_s)
+        entity.set_attribute dict, "_#{label_input}_formula", input[:value].to_f.to_s
+        entity.definition.set_attribute dict, "_inst__#{label_input}_formula", input[:value].to_f.to_s
+        # REDRAW
+        $dc_observers.get_latest_class.redraw_with_undo(entity) if input_is_standart[0]
+        entity.delete_attribute dict, "_#{label_input}_formula"
+        entity.definition.delete_attribute dict, "_inst__#{label_input}_formula"
+        entity.definition.set_attribute dict, "_inst_#{label_input}", result_value.to_f.to_s
+        entity.set_attribute dict, label_input, result_value.to_f.to_s
+        entity.definition.set_attribute dict, "_inst__#{label_input}_formula", "null"
+      else
+        entity.definition.set_attribute dict, "_#{label_input}_formula", input[:value].to_f.to_s
+        # REDRAW
+        $dc_observers.get_latest_class.redraw_with_undo(entity) if input_is_standart[0]
+        entity.definition.delete_attribute dict, "_#{label_input}_formula"
+        entity.set_attribute dict, label_input, result_value.to_f.to_s
+        entity.definition.set_attribute dict, label_input, result_value.to_f.to_s
+      end
     end
 
     case input[:label].to_s
@@ -609,9 +624,8 @@ module AddAttributes
       nil
     end
 
-    # REDRAW
-    $dc_observers.get_latest_class.redraw_with_undo(entity)
-
+    #REDRAW
+    $dc_observers.get_latest_class.redraw_with_undo(entity) if input_is_standart[0]
   end # set_dynamic_attributes
 
   def self.inputbox_attributes
@@ -642,11 +656,10 @@ module AddAttributes
         puts "========================================"
         puts total_count
         puts "========================================"
-      else nil
-    end
+      else
+        nil
+      end
       model.commit_operation
-    else
-      nil
     end
   end # inputbox_attributes
 
@@ -662,27 +675,28 @@ module AddAttributes
     end
   end
 
+  # Create menu items
+  unless file_loaded?(__FILE__)
+    # Create toolbar
+    add_attribute_tb = UI::Toolbar.new(AddAttributes::PLUGIN_NAME)
+    icon_s_inputbox_attributes = File.join(AddAttributes::PATH_ICONS, "inputbox_attributes_24.png")
+    icon_inputbox_attributes = File.join(AddAttributes::PATH_ICONS, "inputbox_attributes_36.png")
+
+    # Add item "inputbox_attributes"
+    inputbox_attributes_cmd = UI::Command.new("Adding new attribute from inputbox"){ AddAttributes::inputbox_attributes }
+    inputbox_attributes_cmd.small_icon = icon_s_inputbox_attributes
+    inputbox_attributes_cmd.large_icon = icon_inputbox_attributes
+    inputbox_attributes_cmd.tooltip = "Adding new attributes from inputbox"
+    inputbox_attributes_cmd.status_bar_text = "Adding new attributes from inputbox"
+
+    add_attribute_tb.add_item(inputbox_attributes_cmd)
+
+    # Create menu
+    add_attribute = UI.menu("Plugins").add_submenu(AddAttributes::PLUGIN_NAME)
+    add_attribute.add_item("Add attributes inputbox"){ AddAttributes::inputbox_attributes }
+    add_attribute.add_item("Help") {AddAttributes::help_information}
+  end
+
 end # module AddAttributes
 
-# Create menu items
-unless file_loaded?(__FILE__)
-  # Create toolbar
-  add_attribute_tb = UI::Toolbar.new(AddAttributes::PLUGIN_NAME)
-  icon_s_inputbox_attributes = File.join(AddAttributes::PATH_ICONS, "inputbox_attributes_24.png")
-  icon_inputbox_attributes = File.join(AddAttributes::PATH_ICONS, "inputbox_attributes_36.png")
-
-  # Add item "inputbox_attributes"
-  inputbox_attributes_cmd = UI::Command.new("Adding new attribute from inputbox"){ AddAttributes::inputbox_attributes }
-  inputbox_attributes_cmd.small_icon = icon_s_inputbox_attributes
-  inputbox_attributes_cmd.large_icon = icon_inputbox_attributes
-  inputbox_attributes_cmd.tooltip = "Adding new attributes from inputbox"
-  inputbox_attributes_cmd.status_bar_text = "Adding new attributes from inputbox"
-
-  add_attribute_tb.add_item(inputbox_attributes_cmd)
-
-  # Create menu
-  add_attribute = UI.menu("Plugins").add_submenu(AddAttributes::PLUGIN_NAME)
-  add_attribute.add_item("Add attributes inputbox"){ AddAttributes::inputbox_attributes }
-  add_attribute.add_item("Help") {AddAttributes::help_information}
-  file_loaded(__FILE__)
-end
+file_loaded(__FILE__)
