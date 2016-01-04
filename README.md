@@ -20,20 +20,20 @@ Add attribute
 
 Description
 -----------
-Ruby plugin for SketchUp 2014 Pro and above to add attributes for selection components including all nested levels.
+Ruby plugin for Sketchup 2014 Pro or above is to define dynamic attributes of selected components of the model, including components in all levels of nested components.
 
 Plugin features :
 
 * Add standard all attributes
 * Add custom attribute
 * Using for components only
-* Component nested level dynamicly changing depending selection and can be selected
+* Dynamically change levels of nested components depending on the selection
 
 Usage
 -------
-You can find in the main menu or toolbar.
+You can use the plugin from toolbar or from the main menu.
 
-*Extension \> Add attribute*
+*Extensions \> Add attribute*
 
 1. **Add attributes inputbox** - Launch dialogbox for choosing what attributes may be added. More information see in help file of plugin.
 2. **Help** - Show the plugin manual.
@@ -42,7 +42,7 @@ You can find in the main menu or toolbar.
 
 Installation
 -----------
-Plugin works only in Sketchup 2014 Pro or above. Update SketchUp before install.
+Plugin works on Sketchup 2014 Pro and above. Update SketchUp Version before installing the plugin.
 [Installing Ruby Plugins in SketchUp](http://help.sketchup.com/en/article/38583)
 
 Authors
