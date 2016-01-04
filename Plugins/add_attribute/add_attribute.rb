@@ -312,7 +312,7 @@ module AddAttributes
         @list = [ choice,
                   "User can't see this attribute",
                   "" ]
-      when "Toogle Units"
+      when "Toggle Units"
         @prompts = [ @prompts_all[:lengthunits] ]
         @defaults = [ "CENTIMETERS" ]
         @list = [ "INCHES|CENTIMETERS" ]
@@ -635,7 +635,7 @@ module AddAttributes
       input = []
       prompts = ["Attribute Name"]
       defaults = ["Custom..."]
-      list = ["Custom...|Name|Summary|Description|ItemCode|X|Y|Z|LenX|LenY|LenZ|RotX|RotY|RotZ|Material|ScaleTool|Hidden|onClick|Copies|ImageURL|DialogWidth|DialogHeight|Toogle Units"]
+      list = ["Custom...|Name|Summary|Description|ItemCode|X|Y|Z|LenX|LenY|LenZ|RotX|RotY|RotZ|Material|ScaleTool|Hidden|onClick|Copies|ImageURL|DialogWidth|DialogHeight|Toggle Units"]
       choice_attributes = UI.inputbox(prompts, defaults, list, "Choice attributes")
       choice = choice_attributes[0].to_s
       attribute_inputbox = AddAttributeInputbox.new

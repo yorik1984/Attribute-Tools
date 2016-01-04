@@ -1,0 +1,84 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Add attribute</title>
+		<link rel="stylesheet" href="help_style.css">
+	<body>
+		<div id="layout-wrapper">
+		<header id="site-header">
+		<p></p>
+		<h1 align="center">Plugin for SketchUp 2014 Pro and above "Add attribute"</h1>
+		<p></p>
+		</header>
+		<article id="site-content">
+		<h2>Description</h2>
+		<p>Plugin for Sketchup 2014 Pro or above is to define dynamic attributes of selected components of the model, including components in all levels of nested components.</p>
+		<p><b>Features :</b></p>
+		<ul>
+		<li>Adding standard attributes</li>
+		<li>Adding custom attributes</li>
+		<li>Works only with the components</li>
+		<li>Dynamically change levels of nested components depending on the selection</li>
+		</ul>
+		<h2>Usage</h2>
+		<p>You can use the plugin from toolbar</p>
+		<p class="fig"><img src="img/toolbar.jpg"  align="top"></p>
+		<p>or from the main menu.</p>
+		<p><code>Extensions > Add attribute </code></p>
+		<ol>
+		<li><code>Add attributes inputbox</code> - It includes a dialog box with a drop-down list to select the attributes you want to add.</li>
+		<li><code>Help</code> - Open the help file (this page).</li>
+		</ol>
+		<p class="fig"><img src="img/select_nothing.jpg"  align="top"></p>
+		<p>When selecting not only components you will see a warning message appears that you need to "Select only components".</p>
+		<p class="fig"><img src="img/select_only_components.jpg"  align="top"></p>
+		<p><em><b>Note</b>. For a speed selection of components, there are several different plugins. For example,  <a href="http://sketchucation.com/plugin/738-tt_selection_toys" target="_blank">Selection Toys.</a></em></p>
+		<p>If the choice is made correctly, you will see a dialog box where you can select an attribute to set its value. It may be custom (<code>Custom...</code>), choose from a list of standard and the possibility of switching units in components by setting attributes (<code>Toggle Units</code>).</p>
+		<p class="fig"><img src="img/choice_attributes.jpg" align="top"></p>
+		<p>When creating a custom attribute (<code>Custom...</code>), there is an additional window to enter the name.</p>
+		<p class="fig"><img src="img/custom_attribute_name.jpg" align="top"></p>
+		<p>The attribute name has a number of limitations. If it is an incorrect name, a format will be warning with an explanation of the error as you type. For example, an attribute name with a beginning number.</p>
+		<p class="fig"><img src="img/failure_number.jpg" align="top"></p>
+		<p>Below is a list of all errors entering the name:</p>
+		<ul>
+		<li><p><code>Attribute name can't be empty</code></p></li>
+		<li><p><code>Attribute name can't contain spaces</code></p></li>
+		<li><p><code>Attribute name can only contain Latin letters and numbers</code></p></li>
+		<li><p><code>Attribute name can't begin with an underscore</code></p></li>
+		<li><p><code>Attribute name can't begin with an number</code></p></li>
+		<li><p><code>You may not name an attribute TRUE or FALSE</code></p></li>
+		</ul>
+		<p>If the entered name matches with the standard attributes, input attribute values will be as the standard with the same name. The following shows the correspondence of input fields, and built-in plug-in Sketchup (<code> Window> Component Attributes </code>) instrument job attributes on the example of his own attributes. For standard attributes dialog box will contain other input fields, depending on the attributes.</p>
+		<p class="fig"><img src="img/input_custom_attribute_compare.jpg" height=95% width=95% align="top"></p>
+		<p>The input fields are filled as well as a built-in editor attributes. Some fields are added for convenience and do not have analogues. Some can have a help in brackets for understanding of how they work.</p>
+		<ul>
+		<li><p><code>List Option.</code> Entering values is carried out on a template <code>&Opt1=Val1&Opt2=Val2&</code>. Recent badges ampersand ("&") required. Between the blocks which are similar to the input line in the standard interface also has to be a separated ampresand. If the value will mean length, the need to set in <b>inches.</b></p></li>
+
+		<li><p><code>Duplicate attribute name.</code> A method of processing attribute, if already presented:
+		<p><code>- Ignore</code> - The attribute value will remain the same</p>
+		<p><code>- Replace</code> - The attribute value will be replaced by a new one</p>
+		<p><code>- Equal replace</code> - It will be processed only the attribute value if the attribute exists. If there is, then it will not be assigned. If there is, it will set a new value.</p>
+		</p></li>
+		<li><p><code>Component nesting levels.</code> The nesting level of processed components. If you select the maximum number from the list, it will be processed all values. For more information on nesting, you can see in the figure below.
+		</p></li>
+		<li><p><code>Report:</code>
+		<p><code>- Off</code> - Deny report</p>
+		<p><code>- Short in messagebox</code> - A brief report in the information window</p>
+		<p><code>- Full in console</code> - Full report in the Ruby Console (<code>Window > Ruby Console</code>). The report will be displayed: the name of the attribute, the number of components, which has been applied an operation job attributes, the nesting level components. Group can add a level of geometry modeling, but the group can not be added to the attribute. The list of components is displayed in a tree according to the nesting elements, similar in <code>Outliner.</code></p>
+		</p></li>
+		</ul>
+		<p class="fig"><img src="img/report.jpg" height=80% width=80% align="top"></p>
+		<h2>Installation</h2>
+		<p>Plugin works on Sketchup 2014 Pro and above. Update SketchUp Version before installing the plugin.
+		<a href="http://help.sketchup.com/en/article/38583">Installing Ruby Plugins in SketchUp</a></p>
+		<div id="footer-cleaner">
+		</div>
+		</div>
+		<footer id="site-footer">
+			<div class="copyleft">(&#596) 2015 Yurij Kulchevich</div>
+			<div class="site-developer">Source code on <a href="https://github.com/yorik1984/Add_attribute" target="_blank">github</a></div>
+		</footer>
+
+	</body>
+</html>
