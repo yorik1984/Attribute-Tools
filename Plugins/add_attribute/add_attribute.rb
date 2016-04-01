@@ -476,13 +476,10 @@ module AddAttributes
                           LIST: "User can select from a list" }
     label_input = input[:label].to_s.downcase
     dict = "dynamic_attributes"
-    instance_name = entity.name.to_s
     definition_name = entity.definition.name.to_s
+    dynamic_attributes_name = entity.get_attribute(dict, "_name")
 
-    if !instance_name.empty?
-      entity.set_attribute dict, "_name", instance_name
-      entity.definition.set_attribute dict, "_name", instance_name
-    else
+    if dynamic_attributes_name == nil
       entity.set_attribute dict, "_name", definition_name
       entity.definition.set_attribute dict, "_name", definition_name
     end
