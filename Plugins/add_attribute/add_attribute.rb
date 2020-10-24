@@ -37,23 +37,23 @@ module AddAttributes
 
     def initialize
       @prompts_all = { label: "Name",
-                   formlabel: "Display label",
+                       formlabel: "Display label",
                        units: "Display in",
                        value: "Value or formula ( = )",
-                formulaunits: "Units",
-                      access: "Display rule",
-                     options: "List Option (&&Opt1=Val1&&Opt2=Val2&&)",
-                 lengthunits: "Toggle Units",
-                   duplicate: "Duplicate attribute name",
-                   recursive: "Component nesting levels (biggest = All)",
-                      report: "Report",
-                     scale_x: "Scale along red. (X)",
-                     scale_y: "Scale along green. (Y)",
-                     scale_z: "Scale along blue. (Z)",
-                   scale_x_z: "Scale in red/blue plane. (X+Z)",
-                   scale_y_z: "Scale in green/blue plane. (Y+Z)",
-                   scale_x_y: "Scale in red/green plane. (X+Y)",
-                 scale_x_y_z: "Scale uniform (from corners). (XYZ)" }
+                       formulaunits: "Units",
+                       access: "Display rule",
+                       options: "List Option (&&Opt1=Val1&&Opt2=Val2&&)",
+                       lengthunits: "Toggle Units",
+                       duplicate: "Duplicate attribute name",
+                       recursive: "Component nesting levels (biggest = All)",
+                       report: "Report",
+                       scale_x: "Scale along red. (X)",
+                       scale_y: "Scale along green. (Y)",
+                       scale_z: "Scale along blue. (Z)",
+                       scale_x_z: "Scale in red/blue plane. (X+Z)",
+                       scale_y_z: "Scale in green/blue plane. (Y+Z)",
+                       scale_x_y: "Scale in red/green plane. (X+Y)",
+                       scale_x_y_z: "Scale uniform (from corners). (XYZ)" }
       @prompts = [ @prompts_all[:label],
                    @prompts_all[:formulaunits],
                    @prompts_all[:access],
@@ -85,12 +85,12 @@ module AddAttributes
       # Inspect attribute name
       valid_status = []
       status_error = { NO_ERROR: "Input attribute name correct",
-                    EMPTY_FIELD: "Attribute name can't be empty",
-                 CONTAIN_SPACES: "Attribute name can't contain spaces",
-           NOT_LETTER_OR_NUMBER: "Attribute name can only contain Latin letters and numbers",
-                     UNDERSCOPE: "Attribute name can't begin with an underscore",
-                NUMBER_IN_BEGIN: "Attribute name can't begin with an number",
-                  TRUE_OR_FALSE: "You may not name an attribute TRUE or FALSE" }
+                       EMPTY_FIELD: "Attribute name can't be empty",
+                       CONTAIN_SPACES: "Attribute name can't contain spaces",
+                       NOT_LETTER_OR_NUMBER: "Attribute name can only contain Latin letters and numbers",
+                       UNDERSCOPE: "Attribute name can't begin with an underscore",
+                       NUMBER_IN_BEGIN: "Attribute name can't begin with an number",
+                       TRUE_OR_FALSE: "You may not name an attribute TRUE or FALSE" }
       if input.to_s == ""
         valid_status[0] = false
         valid_status[1] = status_error[:EMPTY_FIELD]
@@ -340,26 +340,26 @@ module AddAttributes
 
     def standart_attribute(attribute)
       label_std = { name: "Name",
-                 summary: "Summary",
-             description: "Description",
-                itemcode: "ItemCode",
-                       x: "X",
-                       y: "Y",
-                       z: "Z",
+                    summary: "Summary",
+                    description: "Description",
+                    itemcode: "ItemCode",
+                    x: "X",
+                    y: "Y",
+                    z: "Z",
                     lenx: "LenX",
                     leny: "LenY",
                     lenz: "LenZ",
                     rotx: "RotX",
                     roty: "RotY",
                     rotz: "RotZ",
-                material: "Material",
-               scaletool: "ScaleTool",
-                  hidden: "Hidden",
-                 onclick: "onClick",
-                  copies: "Copies",
-                imageurl: "ImageURL",
-             dialogwidth: "DialogWidth",
-            dialogheight: "DialogHeight" }
+                    material: "Material",
+                    scaletool: "ScaleTool",
+                    hidden: "Hidden",
+                    onclick: "onClick",
+                    copies: "Copies",
+                    imageurl: "ImageURL",
+                    dialogwidth: "DialogWidth",
+                    dialogheight: "DialogHeight" }
       standart_attribute_status = []
       key = attribute.to_s.downcase.to_sym
       if label_std.has_key?(key)
@@ -450,29 +450,29 @@ module AddAttributes
 
   def self.set_dynamic_attributes(entity, input)
     attributes_formulaunits = { FLOAT: "Decimal Number",
-                               STRING: "Text",
-                               INCHES: "Inches",
-                          CENTIMETERS: "Centimeters" }
+                                STRING: "Text",
+                                INCHES: "Inches",
+                                CENTIMETERS: "Centimeters" }
     attributes_units = { DEFAULT: "End user's model units",
                          INTEGER: "Whole Number",
-                           FLOAT: "Decimal Number",
+                         FLOAT: "Decimal Number",
                          PERCENT: "Percentage",
                          BOOLEAN: "True/False",
-                          STRING: "Text",
-                          INCHES: "Inches",
-                            FEET: "Decimal Feet",
-                     MILLIMETERS: "Millimeters",
-                     CENTIMETERS: "Centimeters",
-                          METERS: "Meters",
+                         STRING: "Text",
+                         INCHES: "Inches",
+                         FEET: "Decimal Feet",
+                         MILLIMETERS: "Millimeters",
+                         CENTIMETERS: "Centimeters",
+                         METERS: "Meters",
                          DEGREES: "Degrees",
                          DOLLARS: "Dollars",
-                           EUROS: "Euros",
-                             YEN: "Yen",
-                          POUNDS: "Pounds (weight)",
-                       KILOGRAMS: "Kilograms" }
+                         EUROS: "Euros",
+                         YEN: "Yen",
+                         POUNDS: "Pounds (weight)",
+                         KILOGRAMS: "Kilograms" }
     attributes_access = { NONE: "User can't see this attribute",
                           VIEW: "User can see this attribute",
-                       TEXTBOX: "User can edit as a textbox",
+                          TEXTBOX: "User can edit as a textbox",
                           LIST: "User can select from a list" }
     label_input = input[:label].to_s.downcase
     dict = "dynamic_attributes"
@@ -487,9 +487,6 @@ module AddAttributes
     wide_label = ["X", "Y", "Z", "RotX", "RotY", "RotZ", "Copies"]
     without_access = ["Name", "Summary", "Description", "ItemCode", "Material", "ScaleTool", "Hidden", "onClick", "Copies","DialogWidth", "DialogHeight"]
     wide_formlabel = ["X", "Y", "Z", "RotX", "RotY", "RotZ", "Copies"]
-    result_value = input[:value]
-    value_zero = result_value[0].to_s
-    value_formula = result_value[1..result_value.length].to_s
     standart = AddAttributeInputbox.new
     input_is_standart = standart.standart_attribute(input[:label].to_s)
 
@@ -531,23 +528,57 @@ module AddAttributes
         entity.definition.set_attribute dict, "_#{label_input}_formlabel", input[:formlabel].to_s
       end
     end
-
-    if input[:formulaunits].to_s.length != 0
-      case input[:formulaunits].to_s
-      when "Inches"
-        result_value = input[:value].to_f*1.to_inch
-      when "Centimeters"
-        result_value = input[:value].to_f*(1.to_inch/1.to_cm)
-      else
-        result_value = input[:value]
+    result_value = input[:value]
+    unless result_value == nil
+      value_zero = result_value[0].to_s
+      value_formula = result_value[1..result_value.length].to_s
+      if input[:formulaunits].to_s.length != 0
+        case input[:formulaunits].to_s
+        when "Inches"
+          result_value = input[:value].to_f*1.to_inch
+        when "Centimeters"
+          result_value = input[:value].to_f*(1.to_inch/1.to_cm)
+        else
+          result_value = input[:value]
+        end
+        if self.include_element?(wide_formlabel, input[:label].to_s)
+          entity.set_attribute dict, "_#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
+        else
+          entity.definition.set_attribute dict, "_#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
+        end
       end
-      if self.include_element?(wide_formlabel, input[:label].to_s)
-        entity.set_attribute dict, "_#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
+      if value_zero == "="
+        if self.include_element?(wide_label, input[:label].to_s)
+          entity.set_attribute dict, "_#{label_input}_formula", value_formula
+          entity.definition.set_attribute dict, "_inst__#{label_input}_formula", value_formula
+          entity.definition.set_attribute dict, "_inst_#{label_input}", result_value.to_f
+          entity.set_attribute dict, label_input, result_value.to_f
+        else
+          entity.definition.set_attribute dict, "_#{label_input}_formula", value_formula
+          entity.set_attribute dict, label_input, result_value.to_f
+          entity.definition.set_attribute dict, label_input, result_value.to_f
+        end
       else
-        entity.definition.set_attribute dict, "_#{label_input}_formulaunits", attributes_formulaunits.key(input[:formulaunits]).to_s
+        if self.include_element?(wide_label, input[:label].to_s)
+          entity.set_attribute dict, "_#{label_input}_formula", input[:value].to_f.to_s
+          entity.definition.set_attribute dict, "_inst__#{label_input}_formula", input[:value].to_f.to_s
+          # REDRAW
+          $dc_observers.get_latest_class.redraw_with_undo(entity) if input_is_standart[0]
+          entity.delete_attribute dict, "_#{label_input}_formula"
+          entity.definition.delete_attribute dict, "_inst__#{label_input}_formula"
+          entity.definition.set_attribute dict, "_inst_#{label_input}", result_value.to_f.to_s
+          entity.set_attribute dict, label_input, result_value.to_f.to_s
+          entity.definition.set_attribute dict, "_inst__#{label_input}_formula", "null"
+        else
+          entity.definition.set_attribute dict, "_#{label_input}_formula", input[:value].to_f.to_s
+          # REDRAW
+          $dc_observers.get_latest_class.redraw_with_undo(entity) if input_is_standart[0]
+          entity.definition.delete_attribute dict, "_#{label_input}_formula"
+          entity.set_attribute dict, label_input, result_value.to_f.to_s
+          entity.definition.set_attribute dict, label_input, result_value.to_f.to_s
+        end
       end
     end
-
     if input[:options].to_s.length != 0
       entity.set_attribute dict , "_#{label_input}_options", input[:options].to_s
     end
@@ -560,37 +591,6 @@ module AddAttributes
       entity.definition.set_attribute dict, "_lengthunits", "INCHES"
     end
 
-    if value_zero == "="
-      if self.include_element?(wide_label, input[:label].to_s)
-        entity.set_attribute dict, "_#{label_input}_formula", value_formula
-        entity.definition.set_attribute dict, "_inst__#{label_input}_formula", value_formula
-        entity.definition.set_attribute dict, "_inst_#{label_input}", result_value.to_f
-        entity.set_attribute dict, label_input, result_value.to_f
-      else
-        entity.definition.set_attribute dict, "_#{label_input}_formula", value_formula
-        entity.set_attribute dict, label_input, result_value.to_f
-        entity.definition.set_attribute dict, label_input, result_value.to_f
-      end
-    else
-      if self.include_element?(wide_label, input[:label].to_s)
-        entity.set_attribute dict, "_#{label_input}_formula", input[:value].to_f.to_s
-        entity.definition.set_attribute dict, "_inst__#{label_input}_formula", input[:value].to_f.to_s
-        # REDRAW
-        $dc_observers.get_latest_class.redraw_with_undo(entity) if input_is_standart[0]
-        entity.delete_attribute dict, "_#{label_input}_formula"
-        entity.definition.delete_attribute dict, "_inst__#{label_input}_formula"
-        entity.definition.set_attribute dict, "_inst_#{label_input}", result_value.to_f.to_s
-        entity.set_attribute dict, label_input, result_value.to_f.to_s
-        entity.definition.set_attribute dict, "_inst__#{label_input}_formula", "null"
-      else
-        entity.definition.set_attribute dict, "_#{label_input}_formula", input[:value].to_f.to_s
-        # REDRAW
-        $dc_observers.get_latest_class.redraw_with_undo(entity) if input_is_standart[0]
-        entity.definition.delete_attribute dict, "_#{label_input}_formula"
-        entity.set_attribute dict, label_input, result_value.to_f.to_s
-        entity.definition.set_attribute dict, label_input, result_value.to_f.to_s
-      end
-    end
 
     case input[:label].to_s
     when "ScaleTool"
@@ -637,7 +637,7 @@ module AddAttributes
       choice = choice_attributes[0].to_s
       attribute_inputbox = AddAttributeInputbox.new
       input = attribute_inputbox.inputbox(choice, selection)
-      status = model.start_operation('Adding attribute', true)
+      model.start_operation('Adding attribute', true)
       duplicate_status = input[:duplicate].to_s
       recursive_level = input[:recursive].to_i
       report = input[:report].to_s

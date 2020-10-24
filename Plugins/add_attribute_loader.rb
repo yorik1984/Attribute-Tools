@@ -1,4 +1,3 @@
-
 # Loader for add_attribute/add_attribute.rb
 
 require 'sketchup.rb'
