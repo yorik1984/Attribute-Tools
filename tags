@@ -1,0 +1,88 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	D:/DOC/programming/ruby/SU/plugins/Add_attribute/source/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	5.9.0	/1ed3fb28/
+#footer-cleaner	Plugins/add_attribute/help/help_style.css	/^#footer-cleaner {$/;"	i
+#layout-wrapper	Plugins/add_attribute/help/help_style.css	/^#layout-wrapper {$/;"	i
+#site-footer	Plugins/add_attribute/help/help_style.css	/^#site-footer {$/;"	i
+#site-header	Plugins/add_attribute/help/help_style.css	/^#site-header$/;"	i
+.copyleft	Plugins/add_attribute/help/help_style.css	/^.copyleft {$/;"	c
+.site-developer	Plugins/add_attribute/help/help_style.css	/^.site-developer {$/;"	c
+Add attribute	README.md	/^Add attribute$/;"	c
+AddAttributeInputbox	Plugins/add_attribute/add_attribute.rb	/^  class AddAttributeInputbox$/;"	c	module:AddAttributes
+AddAttributes	Plugins/add_attribute/add_attribute.rb	/^module AddAttributes$/;"	m
+AddAttributes	Plugins/add_attribute_loader.rb	/^    module AddAttributes$/;"	m
+Authors	README.md	/^Authors$/;"	s	chapter:Add attribute
+Description	Plugins/add_attribute/help/english.html	/^		<h2>Description<\/h2>$/;"	i
+Description	README.md	/^Description$/;"	s	chapter:Add attribute
+English version of manual	Plugins/add_attribute/help/help.html	/^		<h3><a href="english.html">English version of manual<\/a><\/h3>$/;"	j
+FILENAMESPACE	Plugins/add_attribute_loader.rb	/^      FILENAMESPACE = File.basename(__FILE__, '_loader.rb')$/;"	C	module:AddAttributes
+Installation	Plugins/add_attribute/help/english.html	/^		<h2>Installation<\/h2>$/;"	i
+Installation	README.md	/^Installation$/;"	s	chapter:Add attribute
+PATH	Plugins/add_attribute_loader.rb	/^      PATH          = File.join(PATH_ROOT, FILENAMESPACE).freeze$/;"	C	module:AddAttributes
+PATH_ICONS	Plugins/add_attribute_loader.rb	/^      PATH_ICONS    = File.join(PATH, 'icons').freeze$/;"	C	module:AddAttributes
+PATH_ROOT	Plugins/add_attribute_loader.rb	/^      PATH_ROOT     = File.dirname(__FILE__).freeze$/;"	C	module:AddAttributes
+PLUGIN_ID	Plugins/add_attribute_loader.rb	/^      PLUGIN_ID       = 'AddAttributes'.freeze$/;"	C	module:AddAttributes
+PLUGIN_NAME	Plugins/add_attribute_loader.rb	/^      PLUGIN_NAME     = 'Add attribute'.freeze$/;"	C	module:AddAttributes
+PLUGIN_VERSION	Plugins/add_attribute_loader.rb	/^      PLUGIN_VERSION  = '1.2'.freeze$/;"	C	module:AddAttributes
+Plugin for SketchUp 2014 Pro and above "Add attribute"	Plugins/add_attribute/help/english.html	/^		<h1 align="center">Plugin for SketchUp 2014 Pro and above "Add attribute"<\/h1>$/;"	h
+Plugin for SketchUp 2014 Pro and above "Add attribute"	Plugins/add_attribute/help/help.html	/^		<h1 align="center">Plugin for SketchUp 2014 Pro and above "Add attribute"<\/h1>$/;"	h
+Usage	Plugins/add_attribute/help/english.html	/^		<h2>Usage<\/h2>$/;"	i
+Usage	README.md	/^Usage$/;"	s	chapter:Add attribute
+body	Plugins/add_attribute/help/help_style.css	/^body {$/;"	s
+code	Plugins/add_attribute/help/help_style.css	/^code{$/;"	s
+defaults	Plugins/add_attribute/add_attribute.rb	/^    attr_accessor :prompts, :defaults, :list, :inputbox_window_name, :recursive_level, :recursiv/;"	A	class:AddAttributes.AddAttributeInputbox
+defaults=	Plugins/add_attribute/add_attribute.rb	/^    attr_accessor :prompts, :defaults, :list, :inputbox_window_name, :recursive_level, :recursiv/;"	A	class:AddAttributes.AddAttributeInputbox
+footer-cleaner	Plugins/add_attribute/help/english.html	/^		<div id="footer-cleaner">$/;"	I
+footer-cleaner	Plugins/add_attribute/help/help.html	/^		<div id="footer-cleaner">$/;"	I
+footer-cleaner	Plugins/add_attribute/help/russian.html	/^		<div id="footer-cleaner">$/;"	I
+get_definition	Plugins/add_attribute/add_attribute.rb	/^  def self.get_definition(entity)$/;"	S	module:AddAttributes
+h1	Plugins/add_attribute/help/help_style.css	/^h1{ padding: 20px}$/;"	s
+h2	Plugins/add_attribute/help/help_style.css	/^h2 {margin: 10px;}$/;"	s
+h3	Plugins/add_attribute/help/help_style.css	/^h3 {margin: 10px;}$/;"	s
+help_information	Plugins/add_attribute/add_attribute.rb	/^  def self.help_information$/;"	S	module:AddAttributes
+include_element?	Plugins/add_attribute/add_attribute.rb	/^  def self.include_element?(array, element)$/;"	S	module:AddAttributes
+initialize	Plugins/add_attribute/add_attribute.rb	/^    def initialize$/;"	f	class:AddAttributes.AddAttributeInputbox
+inputbox	Plugins/add_attribute/add_attribute.rb	/^    def inputbox(choice, selection)$/;"	f	class:AddAttributes.AddAttributeInputbox
+inputbox_attributes	Plugins/add_attribute/add_attribute.rb	/^  def self.inputbox_attributes$/;"	S	module:AddAttributes
+inputbox_window_name	Plugins/add_attribute/add_attribute.rb	/^    attr_accessor :prompts, :defaults, :list, :inputbox_window_name, :recursive_level, :recursiv/;"	A	class:AddAttributes.AddAttributeInputbox
+inputbox_window_name=	Plugins/add_attribute/add_attribute.rb	/^    attr_accessor :prompts, :defaults, :list, :inputbox_window_name, :recursive_level, :recursiv/;"	A	class:AddAttributes.AddAttributeInputbox
+layout-wrapper	Plugins/add_attribute/help/english.html	/^		<div id="layout-wrapper">$/;"	I
+layout-wrapper	Plugins/add_attribute/help/help.html	/^		<div id="layout-wrapper">$/;"	I
+layout-wrapper	Plugins/add_attribute/help/russian.html	/^		<div id="layout-wrapper">$/;"	I
+list	Plugins/add_attribute/add_attribute.rb	/^    attr_accessor :prompts, :defaults, :list, :inputbox_window_name, :recursive_level, :recursiv/;"	A	class:AddAttributes.AddAttributeInputbox
+list=	Plugins/add_attribute/add_attribute.rb	/^    attr_accessor :prompts, :defaults, :list, :inputbox_window_name, :recursive_level, :recursiv/;"	A	class:AddAttributes.AddAttributeInputbox
+p	Plugins/add_attribute/help/help_style.css	/^p { margin: 20px; }$/;"	s
+prompts	Plugins/add_attribute/add_attribute.rb	/^    attr_accessor :prompts, :defaults, :list, :inputbox_window_name, :recursive_level, :recursiv/;"	A	class:AddAttributes.AddAttributeInputbox
+prompts=	Plugins/add_attribute/add_attribute.rb	/^    attr_accessor :prompts, :defaults, :list, :inputbox_window_name, :recursive_level, :recursiv/;"	A	class:AddAttributes.AddAttributeInputbox
+recursive_level	Plugins/add_attribute/add_attribute.rb	/^    attr_accessor :prompts, :defaults, :list, :inputbox_window_name, :recursive_level, :recursiv/;"	A	class:AddAttributes.AddAttributeInputbox
+recursive_level=	Plugins/add_attribute/add_attribute.rb	/^    attr_accessor :prompts, :defaults, :list, :inputbox_window_name, :recursive_level, :recursiv/;"	A	class:AddAttributes.AddAttributeInputbox
+recursive_level_list	Plugins/add_attribute/add_attribute.rb	/^    attr_accessor :prompts, :defaults, :list, :inputbox_window_name, :recursive_level, :recursiv/;"	A	class:AddAttributes.AddAttributeInputbox
+recursive_level_list=	Plugins/add_attribute/add_attribute.rb	/^    attr_accessor :prompts, :defaults, :list, :inputbox_window_name, :recursive_level, :recursiv/;"	A	class:AddAttributes.AddAttributeInputbox
+recursive_level_search	Plugins/add_attribute/add_attribute.rb	/^    def recursive_level_search(selection, level)$/;"	f	class:AddAttributes.AddAttributeInputbox
+recursive_set_dynamic_attributes	Plugins/add_attribute/add_attribute.rb	/^  def self.recursive_set_dynamic_attributes(selection, input, duplicate_status, recursive_level,/;"	S	module:AddAttributes
+select_components_messagebox?	Plugins/add_attribute/add_attribute.rb	/^  def self.select_components_messagebox?(selection)$/;"	S	module:AddAttributes
+set_dynamic_attributes	Plugins/add_attribute/add_attribute.rb	/^  def self.set_dynamic_attributes(entity, input)$/;"	S	module:AddAttributes
+site-content	Plugins/add_attribute/help/english.html	/^		<article id="site-content">$/;"	I
+site-content	Plugins/add_attribute/help/help.html	/^		<article id="site-content">$/;"	I
+site-content	Plugins/add_attribute/help/russian.html	/^		<article id="site-content">$/;"	I
+site-footer	Plugins/add_attribute/help/english.html	/^		<footer id="site-footer">$/;"	I
+site-footer	Plugins/add_attribute/help/help.html	/^		<footer id="site-footer">$/;"	I
+site-footer	Plugins/add_attribute/help/russian.html	/^		<footer id="site-footer">$/;"	I
+site-header	Plugins/add_attribute/help/english.html	/^		<header id="site-header">$/;"	I
+site-header	Plugins/add_attribute/help/help.html	/^		<header id="site-header">$/;"	I
+site-header	Plugins/add_attribute/help/russian.html	/^		<header id="site-header">$/;"	I
+standart_attribute	Plugins/add_attribute/add_attribute.rb	/^    def standart_attribute(attribute)$/;"	f	class:AddAttributes.AddAttributeInputbox
+valid_attribute_name	Plugins/add_attribute/add_attribute.rb	/^    def valid_attribute_name(input)$/;"	f	class:AddAttributes.AddAttributeInputbox
+Использование	Plugins/add_attribute/help/russian.html	/^		<h2>Использование<\/h2>$/;"	i
+Описание	Plugins/add_attribute/help/russian.html	/^		<h2>Описание<\/h2>$/;"	i
+Плагин для Sketchup 2014 Pro или выше "Add attribute"	Plugins/add_attribute/help/russian.html	/^		<h1 align="center">Плагин для Sketchup 2014 Pro или выше "Add attribute"<\/h1>$/;"	h
+Справка на русском языке	Plugins/add_attribute/help/help.html	/^		<h3><a href="russian.html">Справка на русском языке<\/a><\/h3>$/;"	j
+Установка	Plugins/add_attribute/help/russian.html	/^		<h2>Установка<\/h2>$/;"	i
