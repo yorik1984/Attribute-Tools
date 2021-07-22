@@ -16,10 +16,13 @@ Jul
  - add component nesting levels
  - add Help content
 30-November-2015 - *version 1.2 - First public version*
-5-November-2020 - *version 2.0 - New public version*
+
+2021 - *version 2.0 - Start New public version*
+ - bug fix
  - multiply attributes adding
  - load pre-settings
- - 
+ - other features
+
 # Description
 
 Ruby plugin for Sketchup 2014 Pro or above is to define dynamic attributes of selected components of the model, including components in all levels of nested components.
