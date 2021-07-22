@@ -32,20 +32,4 @@ build/
 # .ruby-gemset
 
 # unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
-.rvmrc# Backup files
-*.skb
-AutoSave_*.skp
-Backup of *.layout
-
-# Archives
-*.rbz
-
-# RuboCop
-.rubocop-https-*-yml
-
-# SimpleCov
-/coverage
-
-# Bundler
-Gemfile.lock
-
+.rvmrc

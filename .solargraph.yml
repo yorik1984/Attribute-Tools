@@ -1,9 +1,0 @@
-require_paths:
-- "C:/Program Files/SketchUp/SketchUp 2021/Tools"
-- src
-
-require:
-- sketchup-api-stubs
-
-reporters:
-- rubocop
