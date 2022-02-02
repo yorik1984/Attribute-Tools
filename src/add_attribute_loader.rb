@@ -20,7 +20,7 @@ if Sketchup.version.to_f >= version_required
       PATH_ICONS    = File.join(PATH, 'icons').freeze
 
       unless file_loaded?(__FILE__)
-        loader = File.join( PATH, FILENAMESPACE + '.rb' )
+        loader = File.join(PATH, FILENAMESPACE, '.rb')
         add_attribute             = SketchupExtension.new(PLUGIN_NAME, loader)
         add_attribute.description = 'Plugin add attributes of components in model'
         add_attribute.version     = PLUGIN_VERSION
@@ -32,10 +32,10 @@ if Sketchup.version.to_f >= version_required
     end
 
   else
-    UI.messagebox("Plugin \"Add attribute\" work only in PRO version of Sketchup. Visit sketchup.com to upgrade.")
+    UI.messagebox("Plugin «Add attribute» work only in PRO version of Sketchup. Visit sketchup.com to upgrade.")
   end
 else
-  UI.messagebox("Plugin \"Add attribute\" doesn't work in this version of Sketchup. Please, install Sketchup version 20#{version_required.to_s} or above to run this plugin. Visit sketchup.com to upgrade.")
+  UI.messagebox("Plugin «Add attribute» doesn't work in this version of Sketchup. Please, install Sketchup version 20#{version_required.to_s} or above to run this plugin. Visit sketchup.com to upgrade.")
 end
 
 file_loaded(__FILE__)
